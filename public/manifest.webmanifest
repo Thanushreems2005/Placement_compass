@@ -1,0 +1,19 @@
+{
+  "name": "SRM Placement Intelligence",
+  "short_name": "SRM Placements",
+  "description": "Decision-grade placement intelligence for SRM University students and faculty.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f8fa",
+  "theme_color": "#1b2a4e",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "short_name": { "type": "string" },
+    "logo_url": { "type": "string" },
+    "category": { "type": "string" },
+    "employee_size": { "type": "string" },
+    "focus_sectors": { "type": "array", "items": { "type": "string" } },
+    "hiring_velocity": { "type": "string" },
+    "profitability_status": { "type": "string" },
+    "yoy_growth_rate": { "type": "string" },
+    "brand_value": { "type": "string" }
+  },
+  "required": ["name"]
+}

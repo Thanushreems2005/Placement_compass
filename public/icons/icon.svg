@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#1b2a4e" />
+  <circle cx="388" cy="124" r="42" fill="#8bd3dd" />
+  <path fill="#f4f7fb" d="M118 154h276v54H118zM118 242h226v54H118zM118 330h276v54H118z" />
+  <text
+    x="256"
+    y="462"
+    text-anchor="middle"
+    font-family="Arial, sans-serif"
+    font-size="72"
+    font-weight="700"
+    fill="#f4f7fb"
+  >
+    SRM
+  </text>
+</svg>

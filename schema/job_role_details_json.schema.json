@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "job_title": { "type": "string" },
+    "hiring_rounds": { "type": "array", "items": { "type": "object" } },
+    "skill_requirements": { "type": ["array", "null"], "items": { "type": "string" } },
+    "experience_level": { "type": ["string", "null"] },
+    "salary_range": { "type": ["string", "null"] }
+  },
+  "required": ["job_title"]
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "innovation_score": { "type": ["number", "null"] },
+    "patents_count": { "type": ["number", "null"] },
+    "r_and_d_budget": { "type": ["string", "null"] },
+    "tech_stack": { "type": ["array", "null"], "items": { "type": "string" } },
+    "ai_ml_usage": { "type": ["string", "null"] },
+    "automation_level": { "type": ["string", "null"] }
+  }
+}
