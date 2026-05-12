@@ -1,0 +1,128 @@
+DEBUG    httpcore.connection:_trace.py:47 connect_tcp.started host='jytithbexyzlnkjyufit.supabase.co' port=443 local_address=None timeout=120 socket_options=None
+DEBUG    httpcore.connection:_trace.py:47 connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x0000022788B7E270>
+DEBUG    httpcore.connection:_trace.py:47 start_tls.started ssl_context=<ssl.SSLContext object at 0x0000022788BA20D0> server_hostname='jytithbexyzlnkjyufit.supabase.co' timeout=120
+DEBUG    httpcore.connection:_trace.py:47 start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x0000022788BA9310>
+DEBUG    httpcore.http2:_trace.py:47 send_connection_init.started request=<Request [b'GET']>
+DEBUG    httpcore.http2:_trace.py:47 send_connection_init.complete
+DEBUG    httpcore.http2:_trace.py:47 send_request_headers.started request=<Request [b'GET']> stream_id=1
+DEBUG    hpack.hpack:hpack.py:288 Adding (b':method', b'GET') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 2 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b':authority', b'jytithbexyzlnkjyufit.supabase.co') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 1 with 6 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 24 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b':scheme', b'https') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 7 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b':path', b'/rest/v1/companies?select=%2A&offset=0&limit=1000') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 4 with 6 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 35 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'accept', b'*/*') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 19 with 6 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 3 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'accept-encoding', b'gzip, deflate, zstd') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 16 with 6 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 15 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'user-agent', b'python-httpx/0.28.1') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 58 with 6 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 14 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'x-client-info', b'supabase-py/2.30.0') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 10 with 7 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 13 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'x-supabase-client-platform', b'Windows') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 19 with 7 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 6 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'x-supabase-client-platform-version', b'11') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 24 with 7 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 2 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'x-supabase-client-runtime', b'python') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 18 with 7 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 5 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'x-supabase-client-runtime-version', b'3.13.12') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 23 with 7 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 5 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'apikey', b'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dGl0aGJleHl6bG5ranl1Zml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDM3MzQsImV4cCI6MjA5MjE3OTczNH0.Q_wtjr1OT0rysXLhSTGrwHyXdACKnpCt1dkhzLH3_yY') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 5 with 7 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 166 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'authorization', b'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dGl0aGJleHl6bG5ranl1Zml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDM3MzQsImV4cCI6MjA5MjE3OTczNH0.Q_wtjr1OT0rysXLhSTGrwHyXdACKnpCt1dkhzLH3_yY') to the header table, sensitive:True, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 23 with 4 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 171 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'accept-profile', b'public') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 10 with 7 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 5 with 7 bits
+DEBUG    hpack.hpack:hpack.py:288 Adding (b'content-profile', b'public') to the header table, sensitive:False, huffman:True
+DEBUG    hpack.hpack:hpack.py:53 Encoding 11 with 7 bits
+DEBUG    hpack.hpack:hpack.py:53 Encoding 5 with 7 bits
+DEBUG    hpack.hpack:hpack.py:280 Encoded header block to b"\x82A\x98\xe9\xe9&L\xf1\x97\xcf\xaftU\xd7\xa7\xabe2WE\xb5\x8e1\xa0\xab\x90\xff\x87D\xa3b\xc2\xa1,w\x0b\x04=5\x8e\xa3\x15\x1f\xe2\x0bAH\x98\x15\x14?\x07\x96T\x150\x03\xe2\x83Rd\xc0\x10\x00\x1fS\x83\xf9c\xe7P\x8f\x9b\xd9\xab\xfaRB\xcb@\xd2_\xa5=\xa12\x7fz\x8e\xaf\xd2g=KN\x94\xd7\xe5\x80.'\x97\x0f@\x8a\xf2\xb1(1jJ\xc6\xaaS\xff\x8dE\xb5\x8e1\xa0\xabW\xe9\x81.\xc8\x17\x07@\x93\xf2\xb2-\xacq\x8d\x05X\x94\x18\xb5%j\xe8\x1ae=\x94\xff\x86\xe4j\xa4?\x84\x7f@\x98\xf2\xb2-\xacq\x8d\x05X\x94\x18\xb5%j\xe8\x1ae=\x94\xad\xdc\xb6 \xc7\xab\x82\x08\x7f@\x92\xf2\xb2-\xacq\x8d\x05X\x94\x18\xb5%k-\xa9&\xa4\xbf\x85\xaf\xd2g=_@\x97\xf2\xb2-\xacq\x8d\x05X\x94\x18\xb5%k-\xa9&\xa4\xabw-\x881\xea\x85ep\xb2\xb8E@\x85\x1df\xea__\xff'/\xac\xb3\xc7\x88\x86\xd4l\xb98{\xc8\x1d&\xc8\x8c\x95ml\x97\xb29\x93\xad\x7f\x9coe}r\xfa\xcbY\x19\xd0mF\xcb\xeeO\xcb\xb3\xf3\xa7\x0f\xbf\xdd\xd9\x11\x92\xac\xb4~\x9b#\x99)\xad\xb91P\x01\xe2\xcbAq\xd0\xe4x\x9b\xb0uP\x1f\xdah\x06Cx1)}\x1f\xbb\xb29\x92\x9c6\xc6&\x8d\x9e\xf6Z\xf9\xfel6\xae\x98\x19\xd3\xef\x98\xb4_\xd0\xce\x8f{\x11\x92\x9e-\x12\xf6G4t\x85\xbd\x1d03\xaby=\xe9\xc6\x05\xf6E\xe1=,\x0e\xad\xe0\xb3\xd2?3\xcf\xbb~+<c\xf5\xf9$7\xb3U]\xe4\x86N\xb3\xfb\xcf\x8d\x98\xbds\x1f\x08\xff,\xbaQ\xd8[\x14/\xac\xb3\xc7\x88\x86\xd4l\xb98{\xc8\x1d&\xc8\x8c\x95ml\x97\xb29\x93\xad\x7f\x9coe}r\xfa\xcbY\x19\xd0mF\xcb\xeeO\xcb\xb3\xf3\xa7\x0f\xbf\xdd\xd9\x11\x92\xac\xb4~\x9b#\x99)\xad\xb91P\x01\xe2\xcbAq\xd0\xe4x\x9b\xb0uP\x1f\xdah\x06Cx1)}\x1f\xbb\xb29\x92\x9c6\xc6&\x8d\x9e\xf6Z\xf9\xfel6\xae\x98\x19\xd3\xef\x98\xb4_\xd0\xce\x8f{\x11\x92\x9e-\x12\xf6G4t\x85\xbd\x1d03\xaby=\xe9\xc6\x05\xf6E\xe1=,\x0e\xad\xe0\xb3\xd2?3\xcf\xbb~+<c\xf5\xf9$7\xb3U]\xe4\x86N\xb3\xfb\xcf\x8d\x98\xbds@\x8a\x19\x08Z\xd2\xb5v\x1eSP_\x85\xae\xd8\xe81?@\x8b!\xeaIjJ\xd5\xd8yMA\x7f\x85\xae\xd8\xe81?"
+DEBUG    httpcore.http2:_trace.py:47 send_request_headers.complete
+DEBUG    httpcore.http2:_trace.py:47 send_request_body.started request=<Request [b'GET']> stream_id=1
+DEBUG    httpcore.http2:_trace.py:47 send_request_body.complete
+DEBUG    httpcore.http2:_trace.py:47 receive_response_headers.started request=<Request [b'GET']> stream_id=1
+DEBUG    httpcore.http2:_trace.py:47 receive_remote_settings.started
+DEBUG    httpcore.http2:_trace.py:47 receive_remote_settings.complete return_value=<RemoteSettingsChanged changed_settings:{ChangedSetting(setting=3, original_value=None, new_value=100), ChangedSetting(setting=4, original_value=65535, new_value=65536), ChangedSetting(setting=5, original_value=16384, new_value=16777215)}>
+DEBUG    hpack.hpack:hpack.py:474 Decoding b'?\xe1\x1f\x88a\x96\xd0z\xbe\x94\x08T\xd0?J\x08\x02q@\xb3p\x02\xb8\xd3\x8ab\xd1\xbf_\x96\x1du\xd0b\r&=LtA\xea\xfbP\x93\x8e\xc4\x150Z\x99V{^\x86\x02\xc1e\xf6>\x7f@\x85$\xabX?_\x8f~Q\x85\xc0\xb2A\xc6W\xc8\x19]Z\xee}\xbf@\x8a$\xab\x10d\x9c\xab!#M\xa8\x86\xbf\xcfL:2^Z\x83\x9b\xd9\xab]\x9d`\x87\xa6\xb1\xd4b\xa3\xfc\xa0\xd4\x990\x04\x00\x07\xc1\xe5\x95\x05L\x00\xf8Ah)\x13\x02\xa2\x87v\x87%\x07\xb6Ih\x1d\x85x\xa0\xa4~V\x1c\xc5\x81\x90\xb6\xcb\x80\x00>\xd45D\xa2\xd9\x0b\xba\xd8\xef\x9e\x91\x9a\xa4}\xa9]\x85\xa0\xe3\x93{\x8b\x84\x84-i[\x05D<\x86\xaao@\x90\xf2\xb1\x0fRKRVO\xaa\xca\xb1\xebI\x8fR?\x85\xa8\xe8\xa8\xd2\xcb@\x8b!\xeaIjJ\xd5\xd8yMA\x7f\x85\xae\xd8\xe81?@\x8dDkL4\x97\xc0\xfd-\xdc\xb6 \xc7\xab\x011@\x8aDkWa\xfa\x14\x89Z\xc2\xcb\x90\xe9\xe9&L\xf1\x97\xcf\xaftU\xd7\xa7\xabe2\x7f@\x8aDkX^\xd6\x95\tX\xd2\x7f\x99\x00_(]\x10\x96\x00e\x02\xce\x84BY\xf6\xdbq`:7\x9b\x08exl\xbf@\x8f\xf2\xb1j\xee\x7fK\r)-5\xa5b\x1e\xda\x93\x011@\x95\xf2\xb1j\xee\x7fK[Z\x13aGJ\xc8-\x9d\xccB\xac\x93R_\x82h\x00w\xffk\x8a"K\x14t\xc0\x0bP@\r\'\xa7\x9fG\xa6q\xf7Y\xf1]\\\xbddi\x18\x13\x89\xca\x17\xc5\x8b\xdf\xe9\xa38\xb2\x83\xcc\xcb\x05\xd7^l\r6\xe3k\x88O\x81\xd0\t`\xae\x05\xc2\xb8V\xfc\xd7\xb1\xbdw\x82\x0eH\xd9\xab\xaf+\xfbs\xd4 ap\xd8\xef\xd7\t\x06{\xf3h\x86\x9f.w\xcam<\x11{o?\xdc>\xfb\x98\xb8L:\\\xd0\xcf\x1b\xd9\xe5Hd\xf7[\xbc\xaf\xf9<=[\xedxO\xfe\xfe\xb5\xb8\x98\xe4\xed\xeb\x87d\x8f\x11\xee\xe9\xd4\x905\xb9 -e\xd1\xaf\x1d[_1\xb3u\x97\xdd;\x19\x8e\xbb\xe3.\x7f\xb51\xa55\xea\xaa\x8f_jn\x1d%\xdcd\x96\r\'\xa8\xbfjn)-\xb0\xbfjk\x1ag\x81\x8f\xb5/\x9e\x91\x9a\xa8\x11mc\x8ch*\xe4?\xda\x98<\xd6k\n\x884\x1e\xaf\xa5\x02\x154\x0f\xd2\x82\x00\x9cP,\xdcdW\x1aqLZ7\xff@\x85\x1d\tY\x1d\xc9\x90\x9d\x98?\x9b\x8d4\xcf\xf3\xf6\xa5#\x81\xe7\x1a\x00?'
+DEBUG    hpack.hpack:hpack.py:113 Decoded 4096, consumed 3 bytes
+DEBUG    hpack.table:table.py:201 Resizing header table to 4096 from 4096
+DEBUG    hpack.hpack:hpack.py:113 Decoded 8, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:569 Decoded (b':status', b'200'), consumed 1
+DEBUG    hpack.hpack:hpack.py:113 Decoded 33, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 22, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'date', b'Mon, 11 May 2026 13:02:46 GMT'), total consumed 24 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 31, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 22, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'content-type', b'application/json; charset=utf-8'), total consumed 24 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 30, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 6, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'content-range', b'0-139/*'), total consumed 8 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 5, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 15, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'cf-ray', b'9fa1613cabe9c1f7-BLR'), total consumed 23 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 10, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 6, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'cf-cache-status', b'DYNAMIC'), total consumed 19 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 26, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 3, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'content-encoding', b'gzip'), total consumed 5 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 29, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 29, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'content-location', b'/companies?limit=1000&offset=0&select=%2A'), total consumed 31 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 54, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 7, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'server', b'cloudflare'), total consumed 9 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 56, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 32, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), total consumed 34 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 59, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 11, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'vary', b'Accept-Encoding'), total consumed 13 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 16, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 5, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'x-content-type-options', b'nosniff'), total consumed 24 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 11, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 5, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'content-profile', b'public'), total consumed 19 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 13, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 1, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'sb-gateway-version', <memory at 0x0000022788A2B400>), total consumed 17 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 10, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 16, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'sb-project-ref', b'jytithbexyzlnkjyufit'), total consumed 29 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 10, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 25, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'sb-request-id', b'019e1722-01f0-7122-9556-07a8511f8a39'), total consumed 38 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 15, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 1, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'x-envoy-attempt-count', <memory at 0x0000022788A2B340>), total consumed 19 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 21, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 2, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'x-envoy-upstream-service-time', b'400'), total consumed 26 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 55, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 234, consumed 2 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'set-cookie', b'__cf_bm=0usc0atomYj8g6973wpnWyI4sEtG6l.GGzZibo2J0xg-1778504565.2290702-1.0.1.1-XPQ5PC10WsQOkWDRLn20F6iHDpAcaoDgMAmx6vJiNUsCRYZFzvieFiam6M3VCLft1dzp7WDxoAk5qC29ZZ4ScHdqyUqtaGoBNOt04St0epeMPHnR9iiKkfzmQ3bpDaeL; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Mon, 11 May 2026 13:32:46 GMT'), total consumed 237 bytes, indexed True
+DEBUG    hpack.hpack:hpack.py:113 Decoded 5, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:113 Decoded 16, consumed 1 bytes
+DEBUG    hpack.hpack:hpack.py:647 Decoded (b'alt-svc', b'h3=":443"; ma=86400'), total consumed 24 bytes, indexed True
+DEBUG    httpcore.http2:_trace.py:47 receive_response_headers.complete return_value=(200, [(b'date', b'Mon, 11 May 2026 13:02:46 GMT'), (b'content-type', b'application/json; charset=utf-8'), (b'content-range', b'0-139/*'), (b'cf-ray', b'9fa1613cabe9c1f7-BLR'), (b'cf-cache-status', b'DYNAMIC'), (b'content-encoding', b'gzip'), (b'content-location', b'/companies?limit=1000&offset=0&select=%2A'), (b'server', b'cloudflare'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'vary', b'Accept-Encoding'), (b'x-content-type-options', b'nosniff'), (b'content-profile', b'public'), (b'sb-gateway-version', b'1'), (b'sb-project-ref', b'jytithbexyzlnkjyufit'), (b'sb-request-id', b'019e1722-01f0-7122-9556-07a8511f8a39'), (b'x-envoy-attempt-count', b'1'), (b'x-envoy-upstream-service-time', b'400'), (b'set-cookie', b'__cf_bm=0usc0atomYj8g6973wpnWyI4sEtG6l.GGzZibo2J0xg-1778504565.2290702-1.0.1.1-XPQ5PC10WsQOkWDRLn20F6iHDpAcaoDgMAmx6vJiNUsCRYZFzvieFiam6M3VCLft1dzp7WDxoAk5qC29ZZ4ScHdqyUqtaGoBNOt04St0epeMPHnR9iiKkfzmQ3bpDaeL; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Mon, 11 May 2026 13:32:46 GMT'), (b'alt-svc', b'h3=":443"; ma=86400')])
+INFO     httpx:_client.py:1025 HTTP Request: GET https://jytithbexyzlnkjyufit.supabase.co/rest/v1/companies?select=%2A&offset=0&limit=1000 "HTTP/2 200 OK"
+DEBUG    httpcore.http2:_trace.py:47 receive_response_body.started request=<Request [b'GET']> stream_id=1
+DEBUG    httpcore.http2:_trace.py:47 receive_response_body.complete
+DEBUG    httpcore.http2:_trace.py:47 response_closed.started stream_id=1
+DEBUG    httpcore.http2:_trace.py:47 response_closed.complete
