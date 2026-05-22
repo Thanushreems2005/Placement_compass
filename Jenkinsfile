@@ -4,7 +4,7 @@ pipeline {
     // Ensure the nodejs tool uses the correct Node version. 
     // Jenkins will look for the installation matching this name at C:\Program Files\nodejs.
     tools {
-        nodejs 'node20'
+        nodejs 'node24'
     }
 
     stages {
