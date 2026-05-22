@@ -1,8 +1,7 @@
 import type { IntelligenceResponse } from "@/types/canonicalIntelligence.types";
 
-// In development use the Vite proxy (relative path) so the browser avoids CORS.
 const FASTAPI_BASE = typeof window !== "undefined" && window.location.port === "5173"
-  ? "/api/v1"
+  ? "http://127.0.0.1:8000/api/v1"
   : `${window.location.origin}/api/v1`;
 
 export class IntelligenceAPIError extends Error {

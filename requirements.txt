@@ -9,6 +9,8 @@ pydantic
 pydantic-settings
 email-validator
 python-multipart
+pypdf
+python-docx
 bcrypt
 redis>=5.0.0
 langgraph>=0.0.15

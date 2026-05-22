@@ -2,9 +2,10 @@ import { Link } from "@tanstack/react-router";
 import {
   Activity,
   BarChart3,
-  Brain,
   Building2,
+  FileText,
   GitCompareArrows,
+  GraduationCap,
   LayoutGrid,
   Lightbulb,
   ListChecks,
@@ -12,7 +13,14 @@ import {
   Zap,
 } from "lucide-react";
 import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,12 +33,12 @@ const NAV: NavItem[] = [
   { to: "/compare", label: "Compare", icon: GitCompareArrows },
   { to: "/hiring-process", label: "Hiring Process", icon: ListChecks },
   { to: "/skill-mapping", label: "Skill Mapping", icon: Sparkles },
+  { to: "/career-dashboard", label: "Career", icon: GraduationCap },
+  { to: "/resume-optimizer", label: "ATS", icon: FileText },
   { to: "/innovx", label: "InnovX", icon: Lightbulb },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/intelligence", label: "Intelligence", icon: Zap },
-  { to: "/aptitude", label: "Aptitude", icon: Brain },
 ];
-
 
 export function AppHeader() {
   const [open, setOpen] = useState(false);
@@ -90,6 +98,12 @@ export function AppHeader() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72 border-l border-border/60">
+              <SheetHeader className="sr-only">
+                <SheetTitle>Navigation</SheetTitle>
+                <SheetDescription>
+                  Primary placement intelligence navigation links.
+                </SheetDescription>
+              </SheetHeader>
               <div className="mt-8 flex flex-col gap-1.5">
                 {NAV.map((item) => (
                   <Link
