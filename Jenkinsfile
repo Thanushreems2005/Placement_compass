@@ -54,8 +54,8 @@ pipeline {
                 bat 'docker compose -p placement_intelligence down --remove-orphans || exit 0'
 
                 echo 'Cleaning up existing healthy project to prevent port conflicts...'
-                // Use explicit project name and --remove-orphans to completely destroy old containers
-                bat 'docker compose -p placement-com down --remove-orphans || exit 0'
+                // Only prune stopped/exited duplicate containers without destroying healthy running ones
+                bat 'docker container prune -f || exit 0'
             }
         }
 
