@@ -45,7 +45,11 @@ async def search_company_by_name(name: str, response: Response, db: Session = De
     response.headers["X-Cache"] = "MISS"
 
     # 1. Search in FastAPI SQLite DB
-    company = db.query(Company).filter(Company.name.ilike(f"%{name}%")).first()
+    company = None
+    try:
+        company = db.query(Company).filter(Company.name.ilike(f"%{name}%")).first()
+    except Exception as e:
+        logger.warning(f"Failed to query local database for {name}: {e}")
 
     # 2. Search in LangGraph Golden Records (validated_memory.json)
     intelligence_data = None

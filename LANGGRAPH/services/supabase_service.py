@@ -387,9 +387,16 @@ class SupabaseClient:
                 "timestamp": datetime.utcnow().isoformat()
             }
             
+            def json_serial(obj):
+                if isinstance(obj, datetime):
+                    return obj.isoformat()
+                return str(obj)
+
+            clean_payload = json.loads(json.dumps(payload, default=json_serial))
+            
             # Note: Ensure you have an 'audit_history' table in Supabase
             try:
-                self._insert_self_healing("audit_history", payload)
+                self._insert_self_healing("audit_history", clean_payload)
                 logger.info(f"Successfully saved workflow artifacts for {company_name}")
             except Exception as se:
                 logger.warning(f"Audit persistence failed (likely table missing): {str(se)}")
