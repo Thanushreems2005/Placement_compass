@@ -37,7 +37,8 @@ pipeline {
         stage('Docker Cleanup') {
             steps {
                 echo 'Cleaning up old containers safely...'
-                bat 'docker compose down || exit 0'
+                // Use explicit project name and --remove-orphans to clean up old stacks
+                bat 'docker compose -p placement-com down --remove-orphans || exit 0'
             }
         }
 
@@ -50,14 +51,14 @@ pipeline {
                 echo 'Building Docker Images...'
                 // --progress=plain ensures we see pip install logs in real-time
                 // DOCKER_BUILDKIT=1 enables advanced layer caching
-                bat 'set "DOCKER_BUILDKIT=1" && docker compose build --progress=plain'
+                bat 'set "DOCKER_BUILDKIT=1" && docker compose -p placement-com build --progress=plain'
             }
         }
 
         stage('Docker Deploy') {
             steps {
                 echo 'Starting Services...'
-                bat 'docker compose up -d'
+                bat 'docker compose -p placement-com up -d --remove-orphans'
             }
         }
 
@@ -69,7 +70,7 @@ pipeline {
                 
                 echo 'Verifying Redis...'
                 // Get the container ID/name dynamically or use compose exec
-                bat 'docker compose exec -T redis redis-cli ping || exit 1'
+                bat 'docker compose -p placement-com exec -T redis redis-cli ping || exit 1'
 
                 echo 'Checking Backend Health...'
                 bat 'curl -f http://localhost:8000/docs || exit 1'
@@ -86,7 +87,7 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed. Please check the logs in Jenkins.'
-            bat 'docker compose logs --tail=100'
+            bat 'docker compose -p placement-com logs --tail=100'
         }
     }
 }
