@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node20'
+        nodejs 'node22'
     }
 
     stages {
@@ -49,7 +49,8 @@ pipeline {
             steps {
                 echo 'Building Docker Images...'
                 // --progress=plain ensures we see pip install logs in real-time
-                bat 'docker compose build --progress=plain'
+                // DOCKER_BUILDKIT=1 enables advanced layer caching
+                bat 'set DOCKER_BUILDKIT=1 && docker compose build --progress=plain'
             }
         }
 

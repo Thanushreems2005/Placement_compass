@@ -16,8 +16,9 @@ ENV PYTHONUNBUFFERED=1 \
 # Upgrade pip explicitly to avoid older version issues and caching problems
 RUN python -m pip install --upgrade pip
 
-# Install dependencies using --no-cache-dir explicitly just in case ENV gets overridden
-RUN python -m pip install --no-cache-dir -r requirements.txt
+# Use BuildKit cache mount for Python package installations to massively speed up rebuilds
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 RUN useradd --create-home --shell /bin/bash appuser \
