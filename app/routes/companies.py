@@ -86,7 +86,7 @@ async def search_company_by_name(name: str, response: Response, db: Session = De
         try:
             service = WorkflowService()
             result = await service.execute_research(name)
-            if result and result.data:
+            if result and getattr(result, 'data', None) is not None:
                 intelligence_data = {
                     "consolidated_parameters": result.data,
                     "_record_updated_at": "Just now",
