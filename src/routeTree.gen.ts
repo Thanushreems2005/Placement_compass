@@ -16,6 +16,7 @@ import { Route as HiringProcessRouteImport } from './routes/hiring-process'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as AptitudeRouteImport } from './routes/aptitude'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CompanyCompanyIdRouteImport } from './routes/company.$companyId'
@@ -55,6 +56,11 @@ const CategoriesRoute = CategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AptitudeRoute = AptitudeRouteImport.update({
+  id: '/aptitude',
+  path: '/aptitude',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -74,6 +80,7 @@ const CompanyCompanyIdRoute = CompanyCompanyIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/aptitude': typeof AptitudeRoute
   '/categories': typeof CategoriesRoute
   '/compare': typeof CompareRoute
   '/explore': typeof ExploreRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/aptitude': typeof AptitudeRoute
   '/categories': typeof CategoriesRoute
   '/compare': typeof CompareRoute
   '/explore': typeof ExploreRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/aptitude': typeof AptitudeRoute
   '/categories': typeof CategoriesRoute
   '/compare': typeof CompareRoute
   '/explore': typeof ExploreRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/analytics'
+    | '/aptitude'
     | '/categories'
     | '/compare'
     | '/explore'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/analytics'
+    | '/aptitude'
     | '/categories'
     | '/compare'
     | '/explore'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/analytics'
+    | '/aptitude'
     | '/categories'
     | '/compare'
     | '/explore'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  AptitudeRoute: typeof AptitudeRoute
   CategoriesRoute: typeof CategoriesRoute
   CompareRoute: typeof CompareRoute
   ExploreRoute: typeof ExploreRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aptitude': {
+      id: '/aptitude'
+      path: '/aptitude'
+      fullPath: '/aptitude'
+      preLoaderRoute: typeof AptitudeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analytics': {
       id: '/analytics'
       path: '/analytics'
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
+  AptitudeRoute: AptitudeRoute,
   CategoriesRoute: CategoriesRoute,
   CompareRoute: CompareRoute,
   ExploreRoute: ExploreRoute,

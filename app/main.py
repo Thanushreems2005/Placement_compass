@@ -4,10 +4,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health
+from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health, aptitude
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.hardening import RequestIDMiddleware, TimeoutMiddleware
 from app.core.exceptions import global_exception_handler, not_found_exception_handler, NotFoundException
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -68,9 +69,16 @@ app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(NotFoundException, not_found_exception_handler)
 
 # Middlewares (FastAPI executes them in reverse order of addition: bottom-to-top)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+origins = ["http://localhost:5173"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.add_middleware(LoggingMiddleware)
-app.add_middleware(TimeoutMiddleware, timeout_seconds=60.0)
+app.add_middleware(TimeoutMiddleware, timeout_seconds=300.0)
 app.add_middleware(RequestIDMiddleware)
 
 # Routers
@@ -83,6 +91,8 @@ app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
 app.include_router(notifications.router, prefix=settings.API_V1_STR)
 app.include_router(health.router, prefix=settings.API_V1_STR)
+app.include_router(aptitude.router, prefix=settings.API_V1_STR)
+
 
 @app.get("/")
 def root():

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   Activity,
   BarChart3,
+  Brain,
   Building2,
   GitCompareArrows,
   LayoutGrid,
@@ -27,7 +28,9 @@ const NAV: NavItem[] = [
   { to: "/innovx", label: "InnovX", icon: Lightbulb },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/intelligence", label: "Intelligence", icon: Zap },
+  { to: "/aptitude", label: "Aptitude", icon: Brain },
 ];
+
 
 export function AppHeader() {
   const [open, setOpen] = useState(false);
