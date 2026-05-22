@@ -230,15 +230,23 @@ function IntelligencePage() {
 
       {/* Error */}
       {error && !isLoading && (
-        <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
+        <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm animate-fade-in-up">
           <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <p className="font-semibold text-destructive">Intelligence pipeline error</p>
-            <p className="text-muted-foreground">{error.message}</p>
-            <p className="text-xs text-muted-foreground">
-              Make sure the FastAPI server is running at{" "}
-              <code className="rounded bg-secondary px-1 py-0.5">http://127.0.0.1:8000</code>
+          <div className="space-y-2 flex-1">
+            <p className="font-semibold text-destructive">Extraction Failed: {error.message === "Failed to fetch" ? "Backend Offline" : "Runtime Exception"}</p>
+            <p className="text-muted-foreground">
+              {error.message === "Failed to fetch" 
+                ? "The backend is unreachable. Please check if the Docker container is running."
+                : `The intelligence pipeline encountered an error: ${error.message}`}
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2 text-xs h-8"
+              onClick={() => { progress.start(); refetch(); }}
+            >
+              <RefreshCw className="mr-2 h-3.5 w-3.5" /> Retry Extraction
+            </Button>
           </div>
         </div>
       )}

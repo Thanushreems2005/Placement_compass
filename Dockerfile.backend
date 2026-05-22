@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 # Install minimal build dependencies for Python packages with native extensions.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends build-essential libffi-dev libssl-dev curl \
+    && apt-get install -y --no-install-recommends build-essential gcc libffi-dev libssl-dev curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
@@ -12,7 +12,13 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DEFAULT_TIMEOUT=100 \
     PIP_RETRIES=10
-RUN python -m pip install -r requirements.txt
+
+# Upgrade pip explicitly to avoid older version issues and caching problems
+RUN python -m pip install --upgrade pip
+
+# Use BuildKit cache mount for Python package installations to massively speed up rebuilds
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 RUN useradd --create-home --shell /bin/bash appuser \
@@ -22,4 +28,4 @@ USER appuser
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=10s \
   CMD curl -f http://127.0.0.1:8000/ || exit 1
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-level", "info"]
