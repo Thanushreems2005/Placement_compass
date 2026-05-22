@@ -8,6 +8,7 @@ import {
   Lightbulb,
   ListChecks,
   Sparkles,
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -25,6 +26,7 @@ const NAV: NavItem[] = [
   { to: "/skill-mapping", label: "Skill Mapping", icon: Sparkles },
   { to: "/innovx", label: "InnovX", icon: Lightbulb },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/intelligence", label: "Intelligence", icon: Zap },
 ];
 
 export function AppHeader() {

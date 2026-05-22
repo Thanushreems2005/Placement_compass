@@ -13,7 +13,7 @@ import {
   TrendingUp,
   Wrench,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanies, useCompanyStats } from "@/hooks/use-companies";
@@ -84,6 +84,27 @@ function HomePage() {
   const stats = useCompanyStats();
   const [q, setQ] = useState("");
   const search = useCompanies({ q, limit: 8 });
+
+  // ── Supabase connection probe (remove after confirming data loads) ──
+  useEffect(() => {
+    async function probe() {
+      try {
+        console.log("[DB PROBE] Testing Supabase connection…");
+        const { data, error, count } = await supabase
+          .from("company_json")
+          .select("company_id", { count: "exact" })
+          .limit(3);
+        if (error) {
+          console.error("[DB PROBE] ERROR:", error.message, error);
+        } else {
+          console.log(`[DB PROBE] OK — count=${count}, rows=${data?.length}`, data);
+        }
+      } catch (e) {
+        console.error("[DB PROBE] EXCEPTION:", e);
+      }
+    }
+    probe();
+  }, []);
 
   const hiringQuery = useQuery({
     queryKey: ["hiring-count"],
@@ -195,6 +216,7 @@ function HomePage() {
             label="Companies tracked"
             value={total}
             icon={Building2}
+            loading={stats.isLoading}
             className="shadow-sm hover:shadow-md transition-shadow"
           />
           <StatTile
@@ -202,6 +224,7 @@ function HomePage() {
             value={stats.data?.byCategory.length ?? 0}
             icon={Layers}
             accent="accent"
+            loading={stats.isLoading}
             className="shadow-sm hover:shadow-md transition-shadow"
           />
           <StatTile

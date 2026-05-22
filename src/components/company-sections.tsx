@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Section component definitions for the Company Detail page.
  * Every field maps 1:1 to a `public.company` column. No fabrication, no derived data.

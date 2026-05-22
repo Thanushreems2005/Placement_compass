@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run FastAPI",
+      "type": "shell",
+      "command": "C:/Users/thanu/AppData/Local/Programs/Python/Python313/python.exe",
+      "args": ["-m", "uvicorn", "app.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Frontend",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Run LANGGRAPH Workflow",
+      "type": "shell",
+      "command": "C:/Users/thanu/AppData/Local/Programs/Python/Python313/python.exe",
+      "args": ["LANGGRAPH/main.py"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Install Python deps",
+      "type": "shell",
+      "command": "C:/Users/thanu/AppData/Local/Programs/Python/Python313/python.exe",
+      "args": ["-m", "pip", "install", "-r", "requirements.txt"],
+      "problemMatcher": []
+    }
+  ]
+}

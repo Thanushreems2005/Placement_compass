@@ -290,13 +290,22 @@ function getDomainOverride(name: string): string | null {
 const DIRECT_LOGO_OVERRIDES: [string, string][] = [
   // BMW TechWorks India — uses BMW Group visual identity
   ["bmw techworks", "https://cdn.brandfetch.io/bmw.com/fallback/404/w/200/h/200"],
-  ["bmw group",     "https://cdn.brandfetch.io/bmw.com/fallback/404/w/200/h/200"],
+  ["bmw group", "https://cdn.brandfetch.io/bmw.com/fallback/404/w/200/h/200"],
   // Zepto — Indian quick-commerce startup
-  ["zepto", "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://zeptonow.com&size=128"],
+  [
+    "zepto",
+    "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://zeptonow.com&size=128",
+  ],
   // Physics Wallah — EdTech brand at pw.live
   // Brandfetch 404s for pw.live; use Google faviconV2 which returns the PW orange logo
-  ["physics wallah", "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://pw.live&size=128"],
-  ["physicswallah",  "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://pw.live&size=128"],
+  [
+    "physics wallah",
+    "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://pw.live&size=128",
+  ],
+  [
+    "physicswallah",
+    "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://pw.live&size=128",
+  ],
 ];
 
 function getDirectLogoOverride(name: string): string | null {
@@ -318,7 +327,12 @@ export function CompanyLogo({ name, url, website, size = 40, className }: Props)
   const primaryUrl = isLikelyUrl(cleanUrl) ? cleanUrl : null;
 
   const domain = useMemo(() => {
-    if (website && website.trim() !== "" && website.toLowerCase() !== "na" && website.toLowerCase() !== "n/a") {
+    if (
+      website &&
+      website.trim() !== "" &&
+      website.toLowerCase() !== "na" &&
+      website.toLowerCase() !== "n/a"
+    ) {
       return extractDomain(website);
     }
     return getDomainOverride(name);
@@ -356,7 +370,10 @@ export function CompanyLogo({ name, url, website, size = 40, className }: Props)
       list.push({ url: `https://${domain}/apple-touch-icon-precomposed.png` });
       list.push({ url: `https://${domain}/favicon.ico`, sizeGuard: true });
       // Google S2: great coverage but returns 16×16 globe for unknowns
-      list.push({ url: `https://www.google.com/s2/favicons?domain=${domain}&sz=128`, sizeGuard: true });
+      list.push({
+        url: `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+        sizeGuard: true,
+      });
       // logo.dev: clean 404s for unknowns
       list.push({ url: `https://img.logo.dev/${domain}?token=pk_TCK9KvOzTn-9x0cFrFbDJg&size=64` });
     }

@@ -83,6 +83,9 @@ class Sanitizer:
         """Extract first valid email or return empty if placeholder."""
         if not email or not isinstance(email, str):
             return ""
+        # Strip common URL protocols and mailto prefix
+        email = email.replace("mailto:", "").replace("https://", "").replace("http://", "")
+        
         # Treat placeholders as empty
         e_low = email.lower()
         if "n/a" in e_low or "none" in e_low or e_low.strip() == "na" or "careers@.com" in e_low or "support.microsoft.com" in e_low:
@@ -247,14 +250,37 @@ def transform_company(row: Dict[str, Any]) -> Dict[str, Any]:
         # ── Workforce ────────────────────────────────────────
         "employee_size":          _safe(row.get("employee_size"), ""),
         "office_count":           row.get("office_count"),
+        "headcount_growth_rate":  _safe(row.get("headcount_growth_rate"), ""),
 
         # ── Compliance / ESG ─────────────────────────────────
         "legal_issues":           _safe(row.get("legal_issues"), ""),
         "carbon_footprint":       _safe(row.get("carbon_footprint"), ""),
 
+        # ── NEW: Enterprise Parameters (163 Target) ──────────
+        "cac":                    _safe(row.get("cac"), ""),
+        "clv":                    _safe(row.get("clv"), ""),
+        "ltv":                    _safe(row.get("ltv"), ""),
+        "cac_ltv_ratio":          _safe(row.get("cac_ltv_ratio"), ""),
+        "nps":                    _safe(row.get("nps"), ""),
+        "churn_rate":             _safe(row.get("churn_rate"), ""),
+        "sales_motion":           _safe(row.get("sales_motion"), ""),
+        "company_maturity":       _safe(row.get("company_maturity"), ""),
+        "revenue_per_employee":   _safe(row.get("revenue_per_employee"), ""),
+        "profit_per_employee":    _safe(row.get("profit_per_employee"), ""),
+        "rd_investment_percentage": _safe(row.get("rd_investment_percentage"), ""),
+        "customer_acquisition_channels": _safe(row.get("customer_acquisition_channels"), []),
+        "sales_cycle_length":     _safe(row.get("sales_cycle_length"), ""),
+        "average_deal_size":      _safe(row.get("average_deal_size"), ""),
+        "net_revenue_retention":  _safe(row.get("net_revenue_retention"), ""),
+        "gross_revenue_retention": _safe(row.get("gross_revenue_retention"), ""),
+        "payback_period":         _safe(row.get("payback_period"), ""),
+        "market_share_status":    _safe(row.get("market_share_status"), ""),
+        "crisis_behavior":        _safe(row.get("crisis_behavior"), ""),
+
         # ── Raw row (for null-density and full-record checks) ─
         "_raw": row,
     }
+
 
 
 def transform_all(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -367,6 +393,21 @@ def validate_record(record: Dict[str, Any]) -> Dict[str, Any]:
     emp = record.get("employee_size", "")
     if emp:
         _run("employee_size_placeholder", validate_placeholder_prevention, emp, "Employee Size")
+
+    # ── 14. NEW Enterprise Parameters (Generic Validation) ───
+    new_fields = [
+        "cac", "clv", "ltv", "cac_ltv_ratio", "nps", "churn_rate",
+        "sales_motion", "company_maturity", "revenue_per_employee",
+        "profit_per_employee", "rd_investment_percentage",
+        "sales_cycle_length", "average_deal_size", "net_revenue_retention",
+        "gross_revenue_retention", "payback_period", "market_share_status",
+        "crisis_behavior", "headcount_growth_rate"
+    ]
+    for field in new_fields:
+        val = record.get(field)
+        if val:
+             _run(f"{field}_placeholder", validate_placeholder_prevention, val, field.replace("_", " ").title())
+
 
     # ── Aggregate ─────────────────────────────────────────────
     passed = sum(1 for c in checks if c["valid"])

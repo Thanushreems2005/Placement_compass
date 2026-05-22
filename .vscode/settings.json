@@ -1,0 +1,29 @@
+{
+  "python.defaultInterpreterPath": "C:/Users/thanu/AppData/Local/Programs/Python/Python313/python.exe",
+  "python.analysis.extraPaths": ["./app", "./LANGGRAPH"],
+  "python.analysis.typeCheckingMode": "basic",
+  "python.formatting.provider": "black",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": false,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/*.pyo": true,
+    "**/.ipynb_checkpoints": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/.venv": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/*": true,
+    "**/.git/*": true,
+    "**/__pycache__/*": true,
+    "**/*.pyc": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "redhat.telemetry.enabled": false
+}

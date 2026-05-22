@@ -13,8 +13,7 @@ export const Route = createFileRoute("/categories")({
       { title: "Categories · SRM Placement Intelligence" },
       {
         name: "description",
-        content:
-          "Browse hiring companies grouped by category, with live counts from the database.",
+        content: "Browse hiring companies grouped by category, with live counts from the database.",
       },
     ],
   }),
@@ -25,8 +24,7 @@ function CategoriesPage() {
   const stats = useCompanyStats();
   const [openCategory, setOpenCategory] = useState<string | null>(null);
 
-  const toggle = (label: string) =>
-    setOpenCategory((prev) => (prev === label ? null : label));
+  const toggle = (label: string) => setOpenCategory((prev) => (prev === label ? null : label));
 
   return (
     <div className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6">
@@ -36,8 +34,8 @@ function CategoriesPage() {
       </h1>
       <p className="text-sm text-muted-foreground">
         Click a category to see its companies.{" "}
-        <code className="rounded bg-secondary px-1 font-mono">category</code>{" "}
-        counts are derived live.
+        <code className="rounded bg-secondary px-1 font-mono">category</code> counts are derived
+        live.
       </p>
 
       <div className="mt-6 flex flex-col gap-3">
@@ -73,9 +71,7 @@ function CategoriesPage() {
                     <div
                       className={cn(
                         "grid h-12 w-12 shrink-0 place-items-center rounded-lg transition-colors",
-                        isOpen
-                          ? "bg-accent/20 text-accent"
-                          : "bg-secondary text-primary",
+                        isOpen ? "bg-accent/20 text-accent" : "bg-secondary text-primary",
                       )}
                     >
                       <Layers className="h-5 w-5" />
@@ -118,12 +114,8 @@ function CategoriesPage() {
                 {/* Panel header */}
                 <div className="mb-4 flex items-center justify-between gap-4">
                   <div>
-                    <h2 className="font-display text-lg font-semibold">
-                      {openCategory}
-                    </h2>
-                    <p className="text-xs text-muted-foreground">
-                      Companies in this category
-                    </p>
+                    <h2 className="font-display text-lg font-semibold">{openCategory}</h2>
+                    <p className="text-xs text-muted-foreground">Companies in this category</p>
                   </div>
                   <Link
                     to="/explore"
@@ -171,10 +163,7 @@ function CategoryCompanyGrid({ category }: { category: string }) {
 
   if (list.error) {
     return (
-      <EmptyState
-        title="Couldn't load companies"
-        description={(list.error as Error).message}
-      />
+      <EmptyState title="Couldn't load companies" description={(list.error as Error).message} />
     );
   }
 

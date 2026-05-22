@@ -42,41 +42,6 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#1b2a4e" },
-      { title: "SRM Placement Intelligence" },
-      {
-        name: "description",
-        content:
-          "Decision-grade placement intelligence for SRM University — deeply structured intelligence across hiring, culture, financials and technology.",
-      },
-      { name: "author", content: "SRM Placement Cell" },
-      { property: "og:title", content: "SRM Placement Intelligence" },
-      {
-        property: "og:description",
-        content: "Analyze placement-bound companies across deeply structured intelligence signals.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      {
-        rel: "preconnect",
-        href: "https://rsms.me",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://rsms.me/inter/inter.css",
-      },
-    ],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
@@ -87,7 +52,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>
@@ -99,7 +64,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col bg-background">
+      <div className="flex min-h-screen flex-col bg-background" suppressHydrationWarning>
         <AppHeader />
         <main className="flex-1">
           <Outlet />

@@ -256,7 +256,13 @@ function Metric({
 
 /* ─── Company card ───────────────────────────────────────────── */
 
-function InnovXCompanyCard({ entry, company }: { entry: CompanyInnovX; company?: CompanyListItem }) {
+function InnovXCompanyCard({
+  entry,
+  company,
+}: {
+  entry: CompanyInnovX;
+  company?: CompanyListItem;
+}) {
   const { data } = entry;
   const typeColor =
     TYPE_COLORS[entry.innovationType] ?? "bg-secondary text-muted-foreground border-border";
@@ -300,7 +306,11 @@ function InnovXCompanyCard({ entry, company }: { entry: CompanyInnovX; company?:
       <div className="px-5 py-4">
         <Collapsible defaultOpen={false}>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="w-full flex items-center justify-between group">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full flex items-center justify-between group"
+            >
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
                 <Sparkles className="h-3.5 w-3.5" /> Innovation Intelligence & Projects
               </span>

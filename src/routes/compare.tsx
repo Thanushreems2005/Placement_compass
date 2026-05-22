@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";

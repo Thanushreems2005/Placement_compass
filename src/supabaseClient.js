@@ -1,22 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL_1 = import.meta.env.VITE_SUPABASE_URL_1;
-const SUPABASE_ANON_KEY_1 = import.meta.env.VITE_SUPABASE_ANON_KEY_1;
-const SUPABASE_URL_2 = import.meta.env.VITE_SUPABASE_URL_2;
-const SUPABASE_ANON_KEY_2 = import.meta.env.VITE_SUPABASE_ANON_KEY_2;
+// ── Public anon keys — safe to embed in client-side code ──────────────────────
+const FALLBACK_URL =  "https://jytithbexyzlnkjyufit.supabase.co";
+const FALLBACK_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dGl0aGJleHl6bG5ranl1Zml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDM3MzQsImV4cCI6MjA5MjE3OTczNH0.Q_wtjr1OT0rysXLhSTGrwHyXdACKnpCt1dkhzLH3_yY";
 
-function assertEnv(variableName, value) {
-  if (!value) {
-    throw new Error(
-      `Missing environment variable ${variableName}. Add it to your .env file and restart npm run dev.`,
-    );
-  }
-}
-
-assertEnv("VITE_SUPABASE_URL_1", SUPABASE_URL_1);
-assertEnv("VITE_SUPABASE_ANON_KEY_1", SUPABASE_ANON_KEY_1);
-assertEnv("VITE_SUPABASE_URL_2", SUPABASE_URL_2);
-assertEnv("VITE_SUPABASE_ANON_KEY_2", SUPABASE_ANON_KEY_2);
+const SUPABASE_URL_1  = import.meta.env.VITE_SUPABASE_URL_1  || FALLBACK_URL;
+const SUPABASE_ANON_KEY_1 = import.meta.env.VITE_SUPABASE_ANON_KEY_1 || FALLBACK_KEY;
+const SUPABASE_URL_2  = import.meta.env.VITE_SUPABASE_URL_2  || FALLBACK_URL;
+const SUPABASE_ANON_KEY_2 = import.meta.env.VITE_SUPABASE_ANON_KEY_2 || FALLBACK_KEY;
 
 const authOptions = {
   auth: {

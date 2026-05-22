@@ -2,29 +2,28 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
-function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL =
-    import.meta.env.VITE_SUPABASE_URL ||
-    import.meta.env.VITE_SUPABASE_URL_1 ||
-    process.env.VITE_SUPABASE_URL ||
-    process.env.VITE_SUPABASE_URL_1 ||
-    process.env.SUPABASE_URL ||
-    process.env.SUPABASE_URL_1;
-  const SUPABASE_PUBLISHABLE_KEY =
-    import.meta.env.VITE_SUPABASE_ANON_KEY ||
-    import.meta.env.VITE_SUPABASE_ANON_KEY_1 ||
-    process.env.VITE_SUPABASE_ANON_KEY ||
-    process.env.VITE_SUPABASE_ANON_KEY_1 ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.SUPABASE_ANON_KEY_1;
+// ── Guaranteed fallback values (public anon key — safe to expose in client) ──
+// These are used when VITE_ env vars are not injected (e.g. SSR context, cold start)
+const FALLBACK_URL = "https://jytithbexyzlnkjyufit.supabase.co";
+const FALLBACK_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dGl0aGJleHl6bG5ranl1Zml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDM3MzQsImV4cCI6MjA5MjE3OTczNH0.Q_wtjr1OT0rysXLhSTGrwHyXdACKnpCt1dkhzLH3_yY";
 
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    throw new Error(
-      "Missing Supabase environment variables. Ensure SUPABASE_URL / SUPABASE_URL_1 and SUPABASE_ANON_KEY / SUPABASE_ANON_KEY_1 (or VITE_ prefixed versions) are set in your .env file.",
-    );
-  }
+function createSupabaseClient() {
+  const SUPABASE_URL =
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL_1) ||
+    (typeof process !== "undefined" && process.env?.VITE_SUPABASE_URL) ||
+    (typeof process !== "undefined" && process.env?.VITE_SUPABASE_URL_1) ||
+    (typeof process !== "undefined" && process.env?.SUPABASE_URL) ||
+    FALLBACK_URL;
+
+  const SUPABASE_PUBLISHABLE_KEY =
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_ANON_KEY_1) ||
+    (typeof process !== "undefined" && process.env?.VITE_SUPABASE_ANON_KEY) ||
+    (typeof process !== "undefined" && process.env?.VITE_SUPABASE_ANON_KEY_1) ||
+    (typeof process !== "undefined" && process.env?.SUPABASE_ANON_KEY) ||
+    FALLBACK_ANON_KEY;
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {

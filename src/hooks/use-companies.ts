@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { type CompanyListItem, type CompanyRow, type ShortJson } from "@/lib/company-types";
@@ -35,10 +36,14 @@ function companyJsonToListItem(item: any): CompanyListItem {
     location:
       item.hq ||
       shortJson.location ||
-      (shortJson.city ? `${shortJson.city}${shortJson.country ? `, ${shortJson.country}` : ""}` : undefined),
+      (shortJson.city
+        ? `${shortJson.city}${shortJson.country ? `, ${shortJson.country}` : ""}`
+        : undefined),
     // These fields fall back to full_json when shortJson doesn't have them
-    profitability_status: (shortJson.profitability_status || item.profitability)?.trim() || undefined,
-    remote_policy_details: (shortJson.remote_policy_details || item.remote_policy)?.trim() || undefined,
+    profitability_status:
+      (shortJson.profitability_status || item.profitability)?.trim() || undefined,
+    remote_policy_details:
+      (shortJson.remote_policy_details || item.remote_policy)?.trim() || undefined,
     hiring_velocity: (shortJson.hiring_velocity || item.hiring_vel)?.trim() || undefined,
     // Always normalize focus_sectors to a proper string array
     focus_sectors: normalizeArrayField(shortJson.focus_sectors || item.sectors),
@@ -101,11 +106,12 @@ function applyListFilters(rows: CompanyListItem[], filters: CompanyListFilters):
 
       return (
         matchesSearch &&
-        (!filters.category      || eqTrim(row.category, filters.category)) &&
-        (!filters.profitability  || eqTrim(row.profitability_status, filters.profitability)) &&
-        (!filters.remotePolicy   || eqTrim((row as any).remote_policy_details, filters.remotePolicy)) &&
+        (!filters.category || eqTrim(row.category, filters.category)) &&
+        (!filters.profitability || eqTrim(row.profitability_status, filters.profitability)) &&
+        (!filters.remotePolicy ||
+          eqTrim((row as any).remote_policy_details, filters.remotePolicy)) &&
         (!filters.hiringVelocity || eqTrim((row as any).hiring_velocity, filters.hiringVelocity)) &&
-        (!filters.focusSector   || focusSectors.includes(filters.focusSector.trim()))
+        (!filters.focusSector || focusSectors.includes(filters.focusSector.trim()))
       );
     })
     .sort((a, b) => {
@@ -419,17 +425,19 @@ export function useCompanies(filters: CompanyListFilters = {}) {
       if (source === "company_json") {
         const { data, error } = await supabase
           .from("company_json")
-          .select([
-            "company_id",
-            "short_json",
-            "overview:full_json->overview_text",
-            "hq:full_json->headquarters_address",
-            "website_url:full_json->website_url",
-            "profitability:full_json->profitability_status",
-            "remote_policy:full_json->remote_policy_details",
-            "hiring_vel:full_json->hiring_velocity",
-            "sectors:full_json->focus_sectors",
-          ].join(", "));
+          .select(
+            [
+              "company_id",
+              "short_json",
+              "overview:full_json->overview_text",
+              "hq:full_json->headquarters_address",
+              "website_url:full_json->website_url",
+              "profitability:full_json->profitability_status",
+              "remote_policy:full_json->remote_policy_details",
+              "hiring_vel:full_json->hiring_velocity",
+              "sectors:full_json->focus_sectors",
+            ].join(", "),
+          );
         if (error) throw error;
         return applyListFilters(
           (data ?? []).map((item) => companyJsonToListItem(item)),
@@ -760,12 +768,15 @@ export function useFilterFacets() {
   return {
     isLoading: companies.isLoading,
     error: companies.error,
-    data: rows.length === 0 ? undefined : {
-      category:              uniqStrings((r) => r.category),
-      profitability_status:  uniqStrings((r) => r.profitability_status),
-      remote_policy_details: uniqStrings((r) => (r as any).remote_policy_details),
-      hiring_velocity:       uniqStrings((r) => (r as any).hiring_velocity),
-      focus_sectors:         uniqArrays((r) => r.focus_sectors),
-    },
+    data:
+      rows.length === 0
+        ? undefined
+        : {
+            category: uniqStrings((r) => r.category),
+            profitability_status: uniqStrings((r) => r.profitability_status),
+            remote_policy_details: uniqStrings((r) => (r as any).remote_policy_details),
+            hiring_velocity: uniqStrings((r) => (r as any).hiring_velocity),
+            focus_sectors: uniqArrays((r) => r.focus_sectors),
+          },
   };
 }

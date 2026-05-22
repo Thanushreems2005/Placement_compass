@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SkillMappingRouteImport } from './routes/skill-mapping'
+import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as InnovxRouteImport } from './routes/innovx'
 import { Route as HiringProcessRouteImport } from './routes/hiring-process'
 import { Route as ExploreRouteImport } from './routes/explore'
@@ -22,6 +23,11 @@ import { Route as CompanyCompanyIdRouteImport } from './routes/company.$companyI
 const SkillMappingRoute = SkillMappingRouteImport.update({
   id: '/skill-mapping',
   path: '/skill-mapping',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntelligenceRoute = IntelligenceRouteImport.update({
+  id: '/intelligence',
+  path: '/intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InnovxRoute = InnovxRouteImport.update({
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/explore': typeof ExploreRoute
   '/hiring-process': typeof HiringProcessRoute
   '/innovx': typeof InnovxRoute
+  '/intelligence': typeof IntelligenceRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/explore': typeof ExploreRoute
   '/hiring-process': typeof HiringProcessRoute
   '/innovx': typeof InnovxRoute
+  '/intelligence': typeof IntelligenceRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/explore': typeof ExploreRoute
   '/hiring-process': typeof HiringProcessRoute
   '/innovx': typeof InnovxRoute
+  '/intelligence': typeof IntelligenceRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/hiring-process'
     | '/innovx'
+    | '/intelligence'
     | '/skill-mapping'
     | '/company/$companyId'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/hiring-process'
     | '/innovx'
+    | '/intelligence'
     | '/skill-mapping'
     | '/company/$companyId'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/hiring-process'
     | '/innovx'
+    | '/intelligence'
     | '/skill-mapping'
     | '/company/$companyId'
   fileRoutesById: FileRoutesById
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   ExploreRoute: typeof ExploreRoute
   HiringProcessRoute: typeof HiringProcessRoute
   InnovxRoute: typeof InnovxRoute
+  IntelligenceRoute: typeof IntelligenceRoute
   SkillMappingRoute: typeof SkillMappingRoute
   CompanyCompanyIdRoute: typeof CompanyCompanyIdRoute
 }
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/skill-mapping'
       fullPath: '/skill-mapping'
       preLoaderRoute: typeof SkillMappingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/intelligence': {
+      id: '/intelligence'
+      path: '/intelligence'
+      fullPath: '/intelligence'
+      preLoaderRoute: typeof IntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/innovx': {
@@ -223,18 +243,10 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreRoute: ExploreRoute,
   HiringProcessRoute: HiringProcessRoute,
   InnovxRoute: InnovxRoute,
+  IntelligenceRoute: IntelligenceRoute,
   SkillMappingRoute: SkillMappingRoute,
   CompanyCompanyIdRoute: CompanyCompanyIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
