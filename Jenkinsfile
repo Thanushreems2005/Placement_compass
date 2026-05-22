@@ -30,21 +30,26 @@ pipeline {
             steps {
                 echo 'Verifying Docker Daemon is running...'
                 bat 'docker version'
+                bat 'docker compose version'
             }
         }
 
         stage('Docker Cleanup') {
             steps {
                 echo 'Cleaning up old containers safely...'
-                // The || exit 0 ensures the pipeline does not fail if there is nothing to tear down
                 bat 'docker compose down || exit 0'
             }
         }
 
         stage('Docker Build') {
+            options {
+                // Prevent Jenkins from failing long pip installs prematurely
+                timeout(time: 30, unit: 'MINUTES')
+            }
             steps {
                 echo 'Building Docker Images...'
-                bat 'docker compose build'
+                // --progress=plain ensures we see pip install logs in real-time
+                bat 'docker compose build --progress=plain'
             }
         }
 
@@ -58,26 +63,29 @@ pipeline {
         stage('Health Check') {
             steps {
                 echo 'Waiting for services to spin up...'
-                // Small sleep to let the services start
-                sleep time: 10, unit: 'SECONDS'
+                // Give the containers extra time to boot and start serving before we check them
+                sleep time: 20, unit: 'SECONDS'
                 
+                echo 'Verifying Redis...'
+                // Get the container ID/name dynamically or use compose exec
+                bat 'docker compose exec -T redis redis-cli ping || exit 1'
+
                 echo 'Checking Backend Health...'
                 bat 'curl -f http://localhost:8000/docs || exit 1'
                 
                 echo 'Checking Frontend Health...'
-                // Note: Ensure your Docker configuration actually exposes port 5173. If it exposes 80, update this.
-                bat 'curl -f http://localhost:5173 || exit 1'
+                bat 'curl -f http://localhost || exit 1'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully! All services deployed and healthy.'
+            echo 'Enterprise Pipeline completed successfully! All services deployed and verified healthy.'
         }
         failure {
             echo 'Pipeline failed. Please check the logs in Jenkins.'
-            echo 'If Docker failed to connect, ensure Docker Desktop is running and Jenkins service has permissions to access it.'
+            bat 'docker compose logs --tail=100'
         }
     }
 }
