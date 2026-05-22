@@ -36,7 +36,11 @@ pipeline {
 
         stage('Docker Cleanup') {
             steps {
-                echo 'Cleaning up old containers safely...'
+                echo 'Cleaning up duplicate failed Jenkins project...'
+                bat 'docker compose -p placement_intel down --remove-orphans || exit 0'
+                bat 'docker compose -p placement_intelligence down --remove-orphans || exit 0'
+
+                echo 'Cleaning up existing healthy project to prevent port conflicts...'
                 // Use explicit project name and --remove-orphans to clean up old stacks
                 bat 'docker compose -p placement-com down --remove-orphans || exit 0'
             }
@@ -59,6 +63,16 @@ pipeline {
             steps {
                 echo 'Starting Services...'
                 bat 'docker compose -p placement-com up -d --remove-orphans'
+            }
+        }
+
+        stage('Docker Debugging & Status') {
+            steps {
+                echo 'Listing all running containers to verify status...'
+                bat 'docker ps'
+                
+                echo 'Listing placement-com compose status...'
+                bat 'docker compose -p placement-com ps'
             }
         }
 
