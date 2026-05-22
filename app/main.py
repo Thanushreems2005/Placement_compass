@@ -73,7 +73,9 @@ app.add_exception_handler(NotFoundException, not_found_exception_handler)
 # Middlewares (FastAPI executes them in reverse order of addition: bottom-to-top)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.add_middleware(LoggingMiddleware)
-app.add_middleware(TimeoutMiddleware, timeout_seconds=60.0)
+# AI orchestration can exceed 60s. Fallback recovery loops require extended windows.
+# 300s is intentional for multi-agent workflows.
+app.add_middleware(TimeoutMiddleware, timeout_seconds=300.0)
 app.add_middleware(RequestIDMiddleware)
 
 # Routers
