@@ -1,6 +1,8 @@
 pipeline {
     agent any
 
+    // Ensure the nodejs tool uses the correct Node version. 
+    // Jenkins will look for the installation matching this name at C:\Program Files\nodejs.
     tools {
         nodejs 'node20'
     }
@@ -26,49 +28,70 @@ pipeline {
             }
         }
 
-        stage('Docker Verification') {
+        stage('Docker Diagnostics & Retry-Safe Verification') {
+            options {
+                // Retry if Docker Desktop backend pipe is temporarily unstable on Windows
+                retry(3)
+            }
             steps {
-                echo 'Verifying Docker Daemon is running...'
+                echo 'Verifying Docker Daemon is responsive...'
                 bat 'docker version'
                 bat 'docker compose version'
+                echo 'Running system diagnostics...'
+                bat 'docker ps -a'
+                bat 'docker network ls'
             }
         }
 
         stage('Docker Cleanup') {
+            options {
+                // Retry cleanup if Docker Desktop pipe drops the connection
+                retry(3)
+            }
             steps {
                 echo 'Cleaning up duplicate failed Jenkins project...'
                 bat 'docker compose -p placement_intel down --remove-orphans || exit 0'
                 bat 'docker compose -p placement_intelligence down --remove-orphans || exit 0'
 
                 echo 'Cleaning up existing healthy project to prevent port conflicts...'
-                // Use explicit project name and --remove-orphans to clean up old stacks
+                // Use explicit project name and --remove-orphans to completely destroy old containers
                 bat 'docker compose -p placement-com down --remove-orphans || exit 0'
+            }
+        }
+
+        stage('Port Validation') {
+            steps {
+                echo 'Ensuring ports are completely free before deployment...'
+                // If findstr succeeds (errorlevel 0), the port is in use and we exit 1 to fail safely
+                bat 'netstat -ano | findstr :8000 >nul && echo "Port 8000 is still bound!" && exit 1 || exit 0'
+                bat 'netstat -ano | findstr :80 >nul && echo "Port 80 is still bound!" && exit 1 || exit 0'
+                bat 'netstat -ano | findstr :6379 >nul && echo "Port 6379 is still bound!" && exit 1 || exit 0'
             }
         }
 
         stage('Docker Build') {
             options {
-                // Prevent Jenkins from failing long pip installs prematurely
                 timeout(time: 30, unit: 'MINUTES')
             }
             steps {
                 echo 'Building Docker Images...'
-                // --progress=plain ensures we see pip install logs in real-time
-                // DOCKER_BUILDKIT=1 enables advanced layer caching
                 bat 'set "DOCKER_BUILDKIT=1" && docker compose -p placement-com build --progress=plain'
             }
         }
 
         stage('Docker Deploy') {
+            options {
+                retry(3)
+            }
             steps {
-                echo 'Starting Services...'
+                echo 'Starting Services Gracefully...'
                 bat 'docker compose -p placement-com up -d --remove-orphans'
             }
         }
 
         stage('Docker Debugging & Status') {
             steps {
-                echo 'Listing all running containers to verify status...'
+                echo 'Listing all running containers to verify unified deployment...'
                 bat 'docker ps'
                 
                 echo 'Listing placement-com compose status...'
@@ -79,11 +102,9 @@ pipeline {
         stage('Health Check') {
             steps {
                 echo 'Waiting for services to spin up...'
-                // Give the containers extra time to boot and start serving before we check them
                 sleep time: 20, unit: 'SECONDS'
                 
                 echo 'Verifying Redis...'
-                // Get the container ID/name dynamically or use compose exec
                 bat 'docker compose -p placement-com exec -T redis redis-cli ping || exit 1'
 
                 echo 'Checking Backend Health...'
@@ -97,10 +118,10 @@ pipeline {
 
     post {
         success {
-            echo 'Enterprise Pipeline completed successfully! All services deployed and verified healthy.'
+            echo 'Enterprise Pipeline completed successfully! Safe Docker restart handled.'
         }
         failure {
-            echo 'Pipeline failed. Please check the logs in Jenkins.'
+            echo 'Pipeline failed. Gathering logs for debugging.'
             bat 'docker compose -p placement-com logs --tail=100'
         }
     }
