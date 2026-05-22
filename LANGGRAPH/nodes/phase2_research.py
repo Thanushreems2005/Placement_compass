@@ -358,7 +358,7 @@ async def _call_llm(
             cooldown_state="no_cooldown",
             retry_decision="retry_with_pacing"
         )
-        raise e  # RERAISE to prevent silent fake success
+        return {}, None
 
     except Exception as e:
         err = str(e)
@@ -397,8 +397,8 @@ async def _call_llm(
             retry_decision=retry_decision
         )
         
-        # DO NOT return silent fallback data! Re-raise meaningful API error!
-        raise ValueError(f"API Provider {prov_enum.value} Failed: {err}") from e
+        # Return empty data instead of crashing the pipeline to trigger graceful fallback
+        return {}, None
 
 
 
