@@ -5,8 +5,8 @@ services:
     command: ["redis-server", "--save", "900", "1", "--appendonly", "yes", "--appendfilename", "appendonly.aof"]
     volumes:
       - redis_data:/data
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
