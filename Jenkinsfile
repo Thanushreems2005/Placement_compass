@@ -50,7 +50,7 @@ pipeline {
                 echo 'Building Docker Images...'
                 // --progress=plain ensures we see pip install logs in real-time
                 // DOCKER_BUILDKIT=1 enables advanced layer caching
-                bat 'set DOCKER_BUILDKIT=1 && docker compose build --progress=plain'
+                bat 'set "DOCKER_BUILDKIT=1" && docker compose build --progress=plain'
             }
         }
 
