@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SkillMappingRouteImport } from './routes/skill-mapping'
 import { Route as ResumeOptimizerRouteImport } from './routes/resume-optimizer'
+import { Route as MissionxRouteImport } from './routes/missionx'
 import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as InnovxRouteImport } from './routes/innovx'
 import { Route as HiringProcessRouteImport } from './routes/hiring-process'
@@ -30,6 +31,11 @@ const SkillMappingRoute = SkillMappingRouteImport.update({
 const ResumeOptimizerRoute = ResumeOptimizerRouteImport.update({
   id: '/resume-optimizer',
   path: '/resume-optimizer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionxRoute = MissionxRouteImport.update({
+  id: '/missionx',
+  path: '/missionx',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntelligenceRoute = IntelligenceRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/innovx': typeof InnovxRoute
   '/intelligence': typeof IntelligenceRoute
   '/resume-optimizer': typeof ResumeOptimizerRoute
+  '/missionx': typeof MissionxRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
 }
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/innovx': typeof InnovxRoute
   '/intelligence': typeof IntelligenceRoute
   '/resume-optimizer': typeof ResumeOptimizerRoute
+  '/missionx': typeof MissionxRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
 }
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/innovx': typeof InnovxRoute
   '/intelligence': typeof IntelligenceRoute
   '/resume-optimizer': typeof ResumeOptimizerRoute
+  '/missionx': typeof MissionxRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
 }
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/innovx'
     | '/intelligence'
     | '/resume-optimizer'
+    | '/missionx'
     | '/skill-mapping'
     | '/company/$companyId'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/innovx'
     | '/intelligence'
     | '/resume-optimizer'
+    | '/missionx'
     | '/skill-mapping'
     | '/company/$companyId'
   id:
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/innovx'
     | '/intelligence'
     | '/resume-optimizer'
+    | '/missionx'
     | '/skill-mapping'
     | '/company/$companyId'
   fileRoutesById: FileRoutesById
@@ -182,6 +194,7 @@ export interface RootRouteChildren {
   InnovxRoute: typeof InnovxRoute
   IntelligenceRoute: typeof IntelligenceRoute
   ResumeOptimizerRoute: typeof ResumeOptimizerRoute
+  MissionxRoute: typeof MissionxRoute
   SkillMappingRoute: typeof SkillMappingRoute
   CompanyCompanyIdRoute: typeof CompanyCompanyIdRoute
 }
@@ -200,6 +213,13 @@ declare module '@tanstack/react-router' {
       path: '/resume-optimizer'
       fullPath: '/resume-optimizer'
       preLoaderRoute: typeof ResumeOptimizerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/missionx': {
+      id: '/missionx'
+      path: '/missionx'
+      fullPath: '/missionx'
+      preLoaderRoute: typeof MissionxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/intelligence': {
@@ -286,6 +306,7 @@ const rootRouteChildren: RootRouteChildren = {
   InnovxRoute: InnovxRoute,
   IntelligenceRoute: IntelligenceRoute,
   ResumeOptimizerRoute: ResumeOptimizerRoute,
+  MissionxRoute: MissionxRoute,
   SkillMappingRoute: SkillMappingRoute,
   CompanyCompanyIdRoute: CompanyCompanyIdRoute,
 }
