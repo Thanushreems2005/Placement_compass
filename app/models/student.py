@@ -20,3 +20,9 @@ class Student(Base):
     github_url = Column(String, nullable=True)
 
     user = relationship("User", back_populates="student_profile")
+    career_skills = relationship("StudentSkill", back_populates="student", cascade="all, delete-orphan")
+    certifications = relationship("StudentCertification", back_populates="student", cascade="all, delete-orphan")
+    internships = relationship("StudentInternship", back_populates="student", cascade="all, delete-orphan")
+    projects = relationship("StudentProject", back_populates="student", cascade="all, delete-orphan")
+    resumes = relationship("StudentResume", back_populates="student", cascade="all, delete-orphan")
+    readiness_reports = relationship("ReadinessReport", back_populates="student", cascade="all, delete-orphan")

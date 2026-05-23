@@ -1,4 +1,4 @@
--- SRM Placement Intelligence: company table with all 163 fields.
+-- PES Placement Intelligence: company table with all 163 fields.
 -- Public read-only intelligence data; no auth required for reads.
 
 CREATE TABLE IF NOT EXISTS public.company (

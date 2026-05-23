@@ -9,9 +9,9 @@ import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
-import { AppHeader } from "@/components/AppHeader";
 import { AppFooter } from "@/components/AppFooter";
 import { Toaster } from "@/components/ui/sonner";
+import { AppShell } from "@/components/layout/AppShell";
 
 interface RouterContext {
   queryClient: QueryClient;
@@ -64,14 +64,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col bg-background" suppressHydrationWarning>
-        <AppHeader />
-        <main className="flex-1">
-          <Outlet />
-        </main>
+      <AppShell>
+        <Outlet />
         <AppFooter />
-        <Toaster />
-      </div>
+      </AppShell>
+      <Toaster />
     </QueryClientProvider>
   );
 }

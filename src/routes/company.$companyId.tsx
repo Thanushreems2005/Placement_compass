@@ -44,7 +44,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/company/$companyId")({
   head: () => ({
     meta: [
-      { title: "Company Profile · SRM Placement Intelligence" },
+      { title: "Company Profile · PES Placement Intelligence" },
       {
         name: "description",
         content:

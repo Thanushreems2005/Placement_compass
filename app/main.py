@@ -14,13 +14,19 @@ except ImportError:
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 from app.core.config import settings
+<<<<<<< HEAD
 from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health
 from app.routes import aptitude_v2
+=======
+from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health, career
+>>>>>>> 2bd4070965769526e2d3ed6a503120533cb93ef2
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.hardening import RequestIDMiddleware, TimeoutMiddleware
 from app.core.exceptions import global_exception_handler, not_found_exception_handler, NotFoundException
 
+load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -87,15 +93,10 @@ app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(NotFoundException, not_found_exception_handler)
 
 # Middlewares (FastAPI executes them in reverse order of addition: bottom-to-top)
-origins = ["http://localhost:5173"]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.add_middleware(LoggingMiddleware)
+# AI orchestration can exceed 60s. Fallback recovery loops require extended windows.
+# 300s is intentional for multi-agent workflows.
 app.add_middleware(TimeoutMiddleware, timeout_seconds=300.0)
 app.add_middleware(RequestIDMiddleware)
 
@@ -109,8 +110,12 @@ app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
 app.include_router(notifications.router, prefix=settings.API_V1_STR)
 app.include_router(health.router, prefix=settings.API_V1_STR)
+<<<<<<< HEAD
 app.include_router(aptitude_v2.router, prefix=settings.API_V1_STR)
 
+=======
+app.include_router(career.router, prefix=settings.API_V1_STR)
+>>>>>>> 2bd4070965769526e2d3ed6a503120533cb93ef2
 
 @app.get("/")
 def root():

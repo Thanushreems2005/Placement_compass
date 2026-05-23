@@ -31,11 +31,11 @@ export const Route = createFileRoute("/explore")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Explore Companies · SRM Placement Intelligence" },
+      { title: "Explore Companies · PES Placement Intelligence" },
       {
         name: "description",
         content:
-          "Filter and sort every company in the SRM placement database by category, sector, hiring velocity, profitability and more.",
+          "Filter and sort every company in the PES placement database by category, sector, hiring velocity, profitability and more.",
       },
     ],
   }),

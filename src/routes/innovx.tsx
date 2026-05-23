@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/innovx")({
   head: () => ({
     meta: [
-      { title: "InnovX Accelerator Intelligence · SRM Placement Intelligence" },
+      { title: "InnovX Accelerator Intelligence · PES Placement Intelligence" },
       {
         name: "description",
         content:

@@ -26,7 +26,7 @@ export const Route = createFileRoute("/compare")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Compare · SRM Placement Intelligence" },
+      { title: "Compare · PES Placement Intelligence" },
       {
         name: "description",
         content:

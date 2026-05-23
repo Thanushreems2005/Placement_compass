@@ -13,7 +13,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/intelligence")({
   head: () => ({
     meta: [
-      { title: "LangGraph Intelligence · SRM Placement Intelligence" },
+      { title: "LangGraph Intelligence · PES Placement Intelligence" },
       {
         name: "description",
         content:

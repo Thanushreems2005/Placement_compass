@@ -47,3 +47,4 @@ validated_memory.json
 checkpoint_state.json
 __pycache__/
 *.pyc
+storage/

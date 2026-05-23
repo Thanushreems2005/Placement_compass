@@ -17,7 +17,7 @@ import { buildRuleBasedRoadmap, normalizeDashboard } from "@/lib/aptitude-analyt
 export const Route = createFileRoute("/aptitude")({
   head: () => ({
     meta: [
-      { title: "Aptitude Learning Tracker · SRM Placement Intelligence" },
+      { title: "Aptitude Learning Tracker · PES Placement Intelligence" },
       {
         name: "description",
         content:
