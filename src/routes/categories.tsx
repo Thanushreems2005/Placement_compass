@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/categories")({
   head: () => ({
     meta: [
-      { title: "Categories · SRM Placement Intelligence" },
+      { title: "Categories · PES Placement Intelligence" },
       {
         name: "description",
         content: "Browse hiring companies grouped by category, with live counts from the database.",

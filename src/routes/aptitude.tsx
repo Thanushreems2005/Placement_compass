@@ -18,7 +18,7 @@ import type { DashboardResponse, LearningRoadmapResponse } from "@/types/aptitud
 export const Route = createFileRoute("/aptitude")({
   head: () => ({
     meta: [
-      { title: "Aptitude Learning Tracker · SRM Placement Intelligence" },
+      { title: "Aptitude Learning Tracker · PES Placement Intelligence" },
       {
         name: "description",
         content:

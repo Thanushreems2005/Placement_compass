@@ -76,7 +76,7 @@ export function AppSidebar() {
           )}
         >
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground text-sm font-bold tracking-tight shadow-lg shadow-primary/20 transition-transform group-hover:scale-105 active:scale-95">
-            SRM
+            PES
           </span>
           {!isCollapsed && (
             <div className="flex flex-col leading-tight overflow-hidden">

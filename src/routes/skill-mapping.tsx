@@ -14,7 +14,7 @@ import type { CompanyRow } from "@/lib/company-types";
 export const Route = createFileRoute("/skill-mapping")({
   head: () => ({
     meta: [
-      { title: "Skill Mapping · SRM Placement Intelligence" },
+      { title: "Skill Mapping · PES Placement Intelligence" },
       {
         name: "description",
         content:

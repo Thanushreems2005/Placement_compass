@@ -20,7 +20,7 @@ import {
 export const Route = createFileRoute("/resume-optimizer")({
   head: () => ({
     meta: [
-      { title: "Resume ATS Optimizer · SRM Placement Intelligence" },
+      { title: "Resume ATS Optimizer · PES Placement Intelligence" },
       {
         name: "description",
         content:

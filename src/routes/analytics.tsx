@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
-      { title: "Analytics · SRM Placement Intelligence" },
+      { title: "Analytics · PES Placement Intelligence" },
       {
         name: "description",
         content:

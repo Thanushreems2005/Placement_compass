@@ -37,7 +37,7 @@ import type {
 export const Route = createFileRoute("/career-dashboard")({
   head: () => ({
     meta: [
-      { title: "Career Dashboard · SRM Placement Intelligence" },
+      { title: "Career Dashboard · PES Placement Intelligence" },
       {
         name: "description",
         content:

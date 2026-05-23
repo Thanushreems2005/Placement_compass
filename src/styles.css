@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * SRM Placement Intelligence — Enterprise design system.
+ * PES Placement Intelligence — Enterprise design system.
  * Academic, dense, decision-grade. Deep navy + analytical teal accent.
  * No playful gradients. High contrast. Optimized for data density.
  */
@@ -68,7 +68,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.04 255);
 
-  /* Primary — deep institutional navy (SRM-academic) */
+  /* Primary — deep institutional navy (PES-academic) */
   --primary: oklch(0.28 0.07 258);
   --primary-foreground: oklch(0.985 0.003 247);
 

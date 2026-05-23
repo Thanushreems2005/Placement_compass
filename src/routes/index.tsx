@@ -28,11 +28,11 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dashboard · SRM Placement Intelligence" },
+      { title: "Dashboard · PES Placement Intelligence" },
       {
         name: "description",
         content:
-          "Orientation, discovery and at-a-glance signals across every company hiring on the SRM campus.",
+          "Orientation, discovery and at-a-glance signals across every company hiring on the PES campus.",
       },
     ],
   }),

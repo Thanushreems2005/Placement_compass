@@ -1,7 +1,7 @@
 {
-  "name": "SRM Placement Intelligence",
-  "short_name": "SRM Placements",
-  "description": "Decision-grade placement intelligence for SRM University students and faculty.",
+  "name": "PES Placement Intelligence",
+  "short_name": "PES Placements",
+  "description": "Decision-grade placement intelligence for PES University students and faculty.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

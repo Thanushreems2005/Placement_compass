@@ -22,7 +22,7 @@ export function AppHeader() {
       <div className="mx-auto flex h-14 max-w-screen-2xl items-center gap-3 px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2.5 font-display group">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground text-sm font-bold tracking-tight shadow-lg shadow-primary/20 transition-transform group-hover:scale-105 active:scale-95">
-            SRM
+            PES
           </span>
           <div className="flex flex-col leading-tight">
             <span className="text-sm font-bold tracking-tight text-foreground/90">
