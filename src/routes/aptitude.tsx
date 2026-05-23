@@ -2,18 +2,17 @@ import React, { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAptitudeDashboard } from "@/hooks/use-aptitude";
 import { ReadinessScoreCard } from "@/components/aptitude/ReadinessScoreCard";
-import { TopicProgressChart } from "@/components/aptitude/TopicProgressChart";
-import { WeaknessHeatmap } from "@/components/aptitude/WeaknessHeatmap";
-import { AccuracySpeedChart } from "@/components/aptitude/AccuracySpeedChart";
 import { LearningRoadmap } from "@/components/aptitude/LearningRoadmap";
 import { AIInsightsPanel } from "@/components/aptitude/AIInsightsPanel";
 import { TestHistoryTable } from "@/components/aptitude/TestHistoryTable";
 import { GamificationBadges } from "@/components/aptitude/GamificationBadges";
+import { TopicProgressChart } from "@/components/aptitude/TopicProgressChart";
 import { SubmitAttemptModal } from "@/components/aptitude/SubmitAttemptModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Brain, RefreshCw, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { DashboardResponse, LearningRoadmapResponse } from "@/types/aptitude";
+import { buildRuleBasedRoadmap, normalizeDashboard } from "@/lib/aptitude-analytics";
 
 export const Route = createFileRoute("/aptitude")({
   head: () => ({
@@ -33,182 +32,126 @@ export const Route = createFileRoute("/aptitude")({
 const DEMO_DATA: DashboardResponse = {
   student_id: "demo",
   readiness_score: 68,
-  overall_accuracy: 74.3,
-  overall_speed: 28.5,
+  xp: 1350,
+  streak: 5,
   total_tests: 14,
-  streak_days: 5,
-  xp_points: 1350,
-  badges: ["First Step", "On a Roll", "Dedicated", "Streak Master"],
+  weak_areas: ["Logical Reasoning", "Data Interpretation"],
+  strong_areas: ["Verbal Ability"],
   topic_breakdown: [
     {
       topic: "Quantitative Aptitude",
-      mastery_score: 72,
+      mastery_score: 76,
       average_accuracy: 76.4,
-      average_speed: 32,
+      average_speed: 28,
       total_attempts: 6,
-      improvement_trend: 8.2,
-      readiness_percentage: 71,
+      improvement_trend: 4,
+      readiness_percentage: 74,
       is_weak: false,
       is_strong: false,
     },
     {
       topic: "Logical Reasoning",
-      mastery_score: 48,
+      mastery_score: 52,
       average_accuracy: 55.0,
-      average_speed: 40,
+      average_speed: 42,
       total_attempts: 4,
-      improvement_trend: -3.1,
-      readiness_percentage: 45,
+      improvement_trend: -2,
+      readiness_percentage: 50,
       is_weak: true,
       is_strong: false,
     },
     {
       topic: "Verbal Ability",
-      mastery_score: 85,
+      mastery_score: 88,
       average_accuracy: 88.2,
       average_speed: 18,
       total_attempts: 5,
-      improvement_trend: 12.0,
-      readiness_percentage: 87,
+      improvement_trend: 6,
+      readiness_percentage: 86,
       is_weak: false,
       is_strong: true,
     },
     {
       topic: "Data Interpretation",
-      mastery_score: 41,
+      mastery_score: 48,
       average_accuracy: 49.7,
-      average_speed: 52,
+      average_speed: 38,
       total_attempts: 3,
-      improvement_trend: -5.4,
-      readiness_percentage: 39,
+      improvement_trend: -5,
+      readiness_percentage: 46,
       is_weak: true,
       is_strong: false,
     },
     {
       topic: "Puzzles",
-      mastery_score: 63,
+      mastery_score: 67,
       average_accuracy: 67.5,
-      average_speed: 45,
+      average_speed: 32,
       total_attempts: 3,
-      improvement_trend: 4.8,
-      readiness_percentage: 60,
+      improvement_trend: 1,
+      readiness_percentage: 65,
       is_weak: false,
       is_strong: false,
     },
   ],
   recent_attempts: [
     {
-      id: 1,
+      id: "1",
       student_id: "demo",
       topic: "Verbal Ability",
       subtopic: "Reading Comprehension",
+      total_questions: 20,
+      correct_answers: 18,
+      wrong_answers: 2,
+      skipped_questions: 0,
+      total_time_seconds: 360,
       score: 88,
-      max_score: 100,
-      accuracy: 88,
-      questions_attempted: 25,
-      correct_answers: 22,
-      wrong_answers: 3,
-      average_solving_time: 18,
-      difficulty_level: "Medium",
-      test_date: new Date(Date.now() - 86400000).toISOString(),
+      accuracy: 90,
+      avg_speed: 18,
+      speed: 18,
+      average_solving_time: 360,
+      difficulty: "Medium",
       created_at: new Date(Date.now() - 86400000).toISOString(),
     },
     {
-      id: 2,
+      id: "2",
       student_id: "demo",
       topic: "Quantitative Aptitude",
-      subtopic: "Time & Work",
+      subtopic: "Algebra",
+      total_questions: 25,
+      correct_answers: 19,
+      wrong_answers: 4,
+      skipped_questions: 2,
+      total_time_seconds: 850,
       score: 76,
-      max_score: 100,
       accuracy: 76,
-      questions_attempted: 20,
-      correct_answers: 15,
-      wrong_answers: 5,
-      average_solving_time: 34,
-      difficulty_level: "Medium",
-      test_date: new Date(Date.now() - 2 * 86400000).toISOString(),
+      avg_speed: 34,
+      speed: 34,
+      average_solving_time: 850,
+      difficulty: "Medium",
       created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
     },
     {
-      id: 3,
+      id: "3",
       student_id: "demo",
       topic: "Logical Reasoning",
-      subtopic: "Syllogisms",
+      subtopic: "Analogy",
+      total_questions: 15,
+      correct_answers: 8,
+      wrong_answers: 5,
+      skipped_questions: 2,
+      total_time_seconds: 630,
       score: 52,
-      max_score: 100,
-      accuracy: 52,
-      questions_attempted: 25,
-      correct_answers: 13,
-      wrong_answers: 12,
-      average_solving_time: 42,
-      difficulty_level: "Hard",
-      test_date: new Date(Date.now() - 3 * 86400000).toISOString(),
+      accuracy: 53,
+      avg_speed: 42,
+      speed: 42,
+      average_solving_time: 630,
+      difficulty: "Hard",
       created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
     },
-    {
-      id: 4,
-      student_id: "demo",
-      topic: "Data Interpretation",
-      subtopic: "Bar & Pie Charts",
-      score: 48,
-      max_score: 100,
-      accuracy: 48,
-      questions_attempted: 20,
-      correct_answers: 9,
-      wrong_answers: 11,
-      average_solving_time: 55,
-      difficulty_level: "Hard",
-      test_date: new Date(Date.now() - 4 * 86400000).toISOString(),
-      created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
-    },
-    {
-      id: 5,
-      student_id: "demo",
-      topic: "Puzzles",
-      subtopic: "Seating Arrangement",
-      score: 64,
-      max_score: 100,
-      accuracy: 64,
-      questions_attempted: 15,
-      correct_answers: 9,
-      wrong_answers: 6,
-      average_solving_time: 48,
-      difficulty_level: "Medium",
-      test_date: new Date(Date.now() - 5 * 86400000).toISOString(),
-      created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
-    },
   ],
-  weak_areas: ["Logical Reasoning", "Data Interpretation"],
-  strong_areas: ["Verbal Ability"],
   ai_insight:
     "Your Verbal Ability is placement-ready — keep that edge! However, Logical Reasoning and Data Interpretation are dragging your overall readiness. Prioritise DI chart-reading and 20 puzzle drills daily to close the gap within 2 weeks.",
-  consistency_heatmap: [],
-  improvement_trend: [
-    {
-      topic: "Quantitative Aptitude",
-      data: [
-        { date: new Date(Date.now() - 6 * 86400000).toISOString(), accuracy: 60 },
-        { date: new Date(Date.now() - 4 * 86400000).toISOString(), accuracy: 70 },
-        { date: new Date(Date.now() - 2 * 86400000).toISOString(), accuracy: 76 },
-      ],
-    },
-    {
-      topic: "Verbal Ability",
-      data: [
-        { date: new Date(Date.now() - 5 * 86400000).toISOString(), accuracy: 78 },
-        { date: new Date(Date.now() - 3 * 86400000).toISOString(), accuracy: 84 },
-        { date: new Date(Date.now() - 1 * 86400000).toISOString(), accuracy: 88 },
-      ],
-    },
-    {
-      topic: "Logical Reasoning",
-      data: [
-        { date: new Date(Date.now() - 6 * 86400000).toISOString(), accuracy: 58 },
-        { date: new Date(Date.now() - 3 * 86400000).toISOString(), accuracy: 54 },
-        { date: new Date(Date.now() - 2 * 86400000).toISOString(), accuracy: 52 },
-      ],
-    },
-  ],
 };
 
 const DEMO_ROADMAP: LearningRoadmapResponse = {
@@ -279,10 +222,15 @@ type BannerState = "offline" | "empty" | "demo-manual" | "live";
 function AptitudePage() {
   const [studentId, setStudentId] = useState("student_1");
   const [manualDemo, setManualDemo] = useState(false);
+  const [roadmapData, setRoadmapData] = useState<LearningRoadmapResponse | null>(null);
 
   const { data: liveData, isLoading, error, refetch } = useAptitudeDashboard(
     manualDemo ? null : studentId
   );
+
+  React.useEffect(() => {
+    setRoadmapData(null);
+  }, [studentId]);
 
   // ── Loading skeleton ────────────────────────────────────────────────────
   if (isLoading) {
@@ -303,64 +251,43 @@ function AptitudePage() {
 
   // ── Decide data source ──────────────────────────────────────────────────
   // Determine which banner (if any) to show and which dataset to use.
-  // IMPORTANT: d is ALWAYS defined — DEMO_DATA is the safe fallback.
+  // NO DEMO DATA - show empty state instead
   let banner: BannerState = "live";
-  let d: DashboardResponse = DEMO_DATA;          // safe default
-  let roadmapData: LearningRoadmapResponse | null = null;
+  let d: DashboardResponse | null = liveData ? normalizeDashboard(liveData) : null;
 
   if (manualDemo) {
     banner = "demo-manual";
-    d = DEMO_DATA;
-    roadmapData = DEMO_ROADMAP;
-  } else if (error || !liveData) {
-    // Backend offline / 4xx / 5xx / still undefined
+    d = normalizeDashboard(DEMO_DATA);
+  } else if (error) {
+    // Backend error - show error state
     banner = "offline";
-    d = DEMO_DATA;
-    roadmapData = DEMO_ROADMAP;
+    d = null;
+  } else if (!liveData) {
+    // Still loading
+    d = null;
   } else if (liveData.total_tests === 0) {
     // Backend reachable but no attempts yet
     banner = "empty";
-    d = DEMO_DATA;
-    roadmapData = DEMO_ROADMAP;
+    d = null;
   } else {
-    // Happy path: real data
     banner = "live";
-    d = liveData;
-    roadmapData =
-      d.weak_areas.length > 0
-        ? {
-            student_id: studentId,
-            recommended_topics: d.weak_areas,
-            weekly_goals: d.weak_areas.map((area, idx) => ({
-              week: idx + 1,
-              topics: [area],
-              primary_topic: area,
-              target_accuracy: 80,
-              hours_planned: 4.5,
-              milestones: [
-                `Complete 20 beginner-level questions in ${area}`,
-                `Attempt 1 sectional test focusing on ${area} accuracy`,
-                `Solve 5 medium-difficulty problems related to this topic`,
-              ],
-            })),
-            daily_targets: {},
-            focus_areas: d.weak_areas,
-            completion_progress: Math.min(100, d.total_tests * 8),
-            ai_insights: d.ai_insight,
-            generated_at: new Date().toISOString(),
-          }
-        : null;
+    d = normalizeDashboard(liveData);
   }
+
+  const activeRoadmap =
+    roadmapData ??
+    (manualDemo ? DEMO_ROADMAP : d && d.total_tests > 0 ? buildRuleBasedRoadmap(d, studentId) : null);
 
   const isDemoShowing = banner !== "live";
 
   // ── Company readiness computed from score ───────────────────────────────
-  const companyReadiness: Record<string, number> = {
-    "TCS / Infosys (Mass Hiring)": Math.round(Math.min(100, d.readiness_score * 1.12)),
-    "Accenture / Cognizant": Math.round(Math.min(100, d.readiness_score * 1.06)),
-    "Product / Dev Companies": Math.round(d.readiness_score * 0.92),
-    "Premium Tier-1 (Google / MS)": Math.round(d.readiness_score * 0.74),
-  };
+  const readiness = d ? Math.round(Number(d.readiness_score || 0)) : 0;
+  const companyReadiness: Record<string, number> = d ? {
+    "TCS / Infosys (Mass Hiring)": Math.round(Math.min(100, readiness * 1.12)),
+    "Accenture / Cognizant": Math.round(Math.min(100, readiness * 1.06)),
+    "Product / Dev Companies": Math.round(readiness * 0.92),
+    "Premium Tier-1 (Google / MS)": Math.round(readiness * 0.74),
+  } : {};
 
   // ── Render ──────────────────────────────────────────────────────────────
   return (
@@ -453,7 +380,7 @@ function AptitudePage() {
         <div className="flex items-start gap-3 rounded-xl border border-info/30 bg-info/5 px-4 py-3 text-sm">
           <Brain className="h-4 w-4 text-info shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="font-semibold text-info">No test history yet — showing demo data</p>
+            <p className="font-semibold text-info">No test history yet</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               Use <strong>Log Test Score</strong> to submit your first mock test and populate your live dashboard.
             </p>
@@ -462,42 +389,73 @@ function AptitudePage() {
         </div>
       )}
 
-      {/* Gamification */}
-      <GamificationBadges xp={d.xp_points} streak={d.streak_days} unlockedBadges={d.badges} />
+      {/* Show empty state if no data and not in demo mode */}
+      {!manualDemo && !d && (
+        <div className="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 text-center">
+          <Brain className="h-16 w-16 mx-auto text-muted-foreground/40 mb-4" />
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            {banner === "offline" ? "Backend Connection Error" : "Ready to Get Started?"}
+          </h2>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            {banner === "offline"
+              ? "Unable to reach the backend. Make sure FastAPI is running at http://127.0.0.1:8000"
+              : "Submit your first aptitude test to see your personalized dashboard and insights."}
+          </p>
+          <div className="flex gap-3 justify-center">
+            {banner === "offline" ? (
+              <Button
+                onClick={() => refetch()}
+                className="gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Retry Connection
+              </Button>
+            ) : (
+              <SubmitAttemptModal studentId={studentId} />
+            )}
+          </div>
+        </div>
+      )}
 
-      {/* Readiness + Company match */}
-      <ReadinessScoreCard
-        score={Math.round(d.readiness_score)}
-        companyReadiness={companyReadiness}
-        topicBreakdown={d.topic_breakdown}
-      />
+      {/* Only show dashboard if we have real data */}
+      {d && (
+        <>
+          {/* Gamification + Dynamic Badges */}
+          <GamificationBadges
+            xp={Number(d.xp || 0)}
+            streak={Number(d.streak || 0)}
+            dashboard={d}
+          />
 
-      <div className="border-t border-border/20" />
+          {/* Topic Radar + Practice Frequency Bar Chart */}
+          <TopicProgressChart data={d.topic_breakdown} />
 
-      {/* Radar + Practice frequency */}
-      <TopicProgressChart data={d.topic_breakdown} />
+          {/* Readiness + Company match */}
+          <ReadinessScoreCard
+            score={readiness}
+            companyReadiness={companyReadiness}
+            topicBreakdown={d.topic_breakdown}
+          />
 
-      {/* Speed/Accuracy + Weakness heatmap */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <AccuracySpeedChart
-          topicBreakdown={d.topic_breakdown}
-          improvementTrend={d.improvement_trend}
-        />
-        <WeaknessHeatmap topicBreakdown={d.topic_breakdown} />
-      </div>
+          {/* AI Learning Roadmap */}
+          <LearningRoadmap
+            roadmapData={activeRoadmap}
+            studentId={studentId}
+            dashboard={d}
+            onRoadmapUpdate={setRoadmapData}
+          />
 
-      {/* AI Learning Roadmap */}
-      <LearningRoadmap roadmapData={roadmapData} studentId={studentId} />
+          {/* AI Coaching Insights */}
+          <AIInsightsPanel
+            insight={d.ai_insight}
+            weakAreas={d.weak_areas}
+            strongAreas={d.strong_areas}
+          />
 
-      {/* AI Coaching Insights */}
-      <AIInsightsPanel
-        insight={d.ai_insight}
-        weakAreas={d.weak_areas}
-        strongAreas={d.strong_areas}
-      />
-
-      {/* Test History */}
-      <TestHistoryTable attempts={d.recent_attempts} />
+          {/* Test History */}
+          <TestHistoryTable attempts={d.recent_attempts} />
+        </>
+      )}
     </div>
   );
 }

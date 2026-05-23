@@ -20,34 +20,31 @@ export interface AptitudeAttemptCreate {
   student_id: string;
   topic: AptitudeTopic;
   subtopic?: string;
-  score: number;
-  max_score?: number;
-  accuracy: number;
-  questions_attempted: number;
+  total_questions: number;
   correct_answers: number;
   wrong_answers: number;
-  skipped_answers?: number;
-  average_solving_time?: number;
-  total_time_taken?: number;
-  difficulty_level?: DifficultyLevel;
-  test_date?: string;
+  skipped_questions?: number;
+  total_time_seconds?: number;
+  difficulty?: DifficultyLevel;
 }
 
 export interface AptitudeAttemptResponse {
-  id: number;
+  id: string | number;
   student_id: string;
   topic: string;
   subtopic?: string;
-  score: number;
-  max_score: number;
-  accuracy: number;
-  questions_attempted: number;
-  correct_answers: number;
-  wrong_answers: number;
+  total_questions?: number;
+  correct_answers?: number;
+  wrong_answers?: number;
+  skipped_questions?: number;
+  total_time_seconds?: number;
+  accuracy?: number;
+  score?: number;
+  avg_speed?: number;
+  speed?: number;
   average_solving_time?: number;
-  difficulty_level: string;
-  test_date: string;
-  created_at: string;
+  difficulty?: DifficultyLevel;
+  created_at?: string;
 }
 
 // --- Topic Progress --------------------------------------------
@@ -178,22 +175,27 @@ export interface TrendEntry {
   data: { date: string; accuracy: number }[];
 }
 
+export interface TopicSummary {
+  topic: string;
+  avg_accuracy: number;
+  avg_score: number;
+  attempts: number;
+  is_weak: boolean;
+  is_strong: boolean;
+}
+
 export interface DashboardResponse {
   student_id: string;
   readiness_score: number;
-  overall_accuracy: number;
-  overall_speed: number;
+  xp: number;
+  streak: number;
   total_tests: number;
-  streak_days: number;
-  xp_points: number;
-  badges: string[];
-  topic_breakdown: TopicAnalytics[];
-  recent_attempts: AptitudeAttemptResponse[];
   weak_areas: string[];
   strong_areas: string[];
+  topic_breakdown: TopicAnalytics[];
+  recent_attempts: AptitudeAttemptResponse[];
   ai_insight: string;
-  consistency_heatmap: ConsistencyEntry[];
-  improvement_trend: TrendEntry[];
+  improvement_trend?: TrendEntry[];
 }
 
 // --- Study Plan ------------------------------------------------

@@ -35,11 +35,11 @@ export function SubmitAttemptModal({ studentId }: SubmitAttemptModalProps) {
   // Form State
   const [topic, setTopic] = useState<AptitudeTopic>("Quantitative Aptitude");
   const [subtopic, setSubtopic] = useState("");
-  const [questionsAttempted, setQuestionsAttempted] = useState(10);
-  const [correctAnswers, setCorrectAnswers] = useState(8);
-  const [wrongAnswers, setWrongAnswers] = useState(2);
+  const [questionsAttempted, setQuestionsAttempted] = useState(0);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [wrongAnswers, setWrongAnswers] = useState(0);
   const [skippedAnswers, setSkippedAnswers] = useState(0);
-  const [totalTimeTaken, setTotalTimeTaken] = useState(300); // in seconds
+  const [totalTimeTaken, setTotalTimeTaken] = useState(0); // in minutes (converted to seconds on submit)
   const [difficultyLevel, setDifficultyLevel] = useState<DifficultyLevel>("Medium");
 
   const submitMutation = useSubmitAttemptMutation();
@@ -48,6 +48,11 @@ export function SubmitAttemptModal({ studentId }: SubmitAttemptModalProps) {
     e.preventDefault();
 
     // Validations
+    if (questionsAttempted === 0) {
+      toast.error("Please enter the number of questions attempted.");
+      return;
+    }
+
     if (correctAnswers + wrongAnswers + skippedAnswers !== questionsAttempted) {
       toast.error(
         `Sum of Correct (${correctAnswers}), Wrong (${wrongAnswers}), and Skipped (${skippedAnswers}) must equal Total Attempted (${questionsAttempted}).`
@@ -57,27 +62,19 @@ export function SubmitAttemptModal({ studentId }: SubmitAttemptModalProps) {
 
     setIsSubmitting(true);
     
-    // Calculate accuracy and score
-    const accuracy = (correctAnswers / questionsAttempted) * 100;
-    const score = correctAnswers * 4 - wrongAnswers * 1; // standard marking e.g. +4, -1
-    const maxScore = questionsAttempted * 4;
-    const avgSolvingTime = totalTimeTaken / questionsAttempted;
+    // Backend will calculate accuracy and score
 
     try {
       await submitMutation.mutateAsync({
         student_id: studentId,
         topic,
         subtopic: subtopic || undefined,
-        score: Math.max(0, score),
-        max_score: maxScore,
-        accuracy,
-        questions_attempted: questionsAttempted,
+        total_questions: questionsAttempted,
         correct_answers: correctAnswers,
         wrong_answers: wrongAnswers,
-        skipped_answers: skippedAnswers,
-        average_solving_time: avgSolvingTime,
-        total_time_taken: totalTimeTaken,
-        difficulty_level: difficultyLevel,
+        skipped_questions: skippedAnswers,
+        total_time_seconds: totalTimeTaken > 0 ? Math.round(totalTimeTaken * 60) : undefined,
+        difficulty: difficultyLevel,
       });
 
       toast.success("Test attempt logged successfully!");
@@ -85,11 +82,11 @@ export function SubmitAttemptModal({ studentId }: SubmitAttemptModalProps) {
       
       // Reset form
       setSubtopic("");
-      setQuestionsAttempted(10);
-      setCorrectAnswers(8);
-      setWrongAnswers(2);
+      setQuestionsAttempted(0);
+      setCorrectAnswers(0);
+      setWrongAnswers(0);
       setSkippedAnswers(0);
-      setTotalTimeTaken(300);
+      setTotalTimeTaken(0);
       setDifficultyLevel("Medium");
     } catch (err: any) {
       toast.error(err.message || "Failed to submit attempt");
@@ -164,13 +161,14 @@ export function SubmitAttemptModal({ studentId }: SubmitAttemptModalProps) {
 
             {/* Total Time */}
             <div className="grid gap-1.5">
-              <Label htmlFor="time" className="field-label">Total Time (Seconds)</Label>
+              <Label htmlFor="time" className="field-label">Total Time (Minutes)</Label>
               <Input
                 id="time"
                 type="number"
-                min={1}
+                min={0}
+                step={0.5}
                 value={totalTimeTaken}
-                onChange={(e) => setTotalTimeTaken(parseInt(e.target.value) || 0)}
+                onChange={(e) => setTotalTimeTaken(parseFloat(e.target.value) || 0)}
                 className="h-10 text-xs rounded-xl"
               />
             </div>

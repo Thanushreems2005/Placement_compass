@@ -30,9 +30,9 @@ class RedisService:
                 host=host,
                 port=port,
                 decode_responses=True,
-                socket_connect_timeout=2.0,
-                socket_timeout=2.0,
-                retry_on_timeout=True
+                socket_connect_timeout=0.5,   # fail fast — Redis is optional
+                socket_timeout=0.5,
+                retry_on_timeout=False,
             )
             # Active status will be verified dynamically
         except Exception as e:

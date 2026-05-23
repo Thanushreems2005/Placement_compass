@@ -7,6 +7,7 @@ import type {
   RoadmapRequest,
   LearningRoadmapResponse,
 } from "@/types/aptitude";
+import { normalizeDashboard } from "@/lib/aptitude-analytics";
 
 const FASTAPI_BASE = typeof window !== "undefined" && window.location.port === "5173"
   ? "/api/v1"
@@ -45,14 +46,15 @@ export async function fetchAptitudeDashboard(studentId: string): Promise<Dashboa
     method: "GET",
     headers: { Accept: "application/json" },
   });
-  return handleResponse<DashboardResponse>(res);
+  const data = await handleResponse<DashboardResponse>(res);
+  return normalizeDashboard(data);
 }
 
 /**
  * Submit a new aptitude test attempt.
  */
 export async function submitAptitudeAttempt(data: AptitudeAttemptCreate): Promise<AptitudeAttemptResponse> {
-  const url = `${FASTAPI_BASE}/aptitude/attempts`;
+  const url = `${FASTAPI_BASE}/aptitude/attempt`;
   const res = await fetch(url, {
     method: "POST",
     headers: {

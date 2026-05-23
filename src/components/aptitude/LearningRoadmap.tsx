@@ -14,32 +14,35 @@ import {
   ChevronRight,
   RefreshCw,
 } from "lucide-react";
-import type { LearningRoadmapResponse, WeeklyGoal } from "@/types/aptitude";
-import { useGenerateRoadmapMutation } from "@/hooks/use-aptitude";
+import type { DashboardResponse, LearningRoadmapResponse } from "@/types/aptitude";
+import { buildRuleBasedRoadmap, safeNum } from "@/lib/aptitude-analytics";
 import { toast } from "sonner";
 
 interface LearningRoadmapProps {
   roadmapData: LearningRoadmapResponse | null;
   studentId: string;
+  dashboard?: DashboardResponse | null;
+  onRoadmapUpdate?: (roadmap: LearningRoadmapResponse) => void;
 }
 
-export function LearningRoadmap({ roadmapData, studentId }: LearningRoadmapProps) {
-  const generateRoadmapMutation = useGenerateRoadmapMutation();
+export function LearningRoadmap({
+  roadmapData,
+  studentId,
+  dashboard,
+  onRoadmapUpdate,
+}: LearningRoadmapProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleRebuildRoadmap = async () => {
+    if (!dashboard) {
+      toast.error("Dashboard data is not available yet.");
+      return;
+    }
     setIsUpdating(true);
     try {
-      await generateRoadmapMutation.mutateAsync({
-        studentId,
-        request: {
-          student_id: studentId,
-          target_companies: ["FAANG", "Core Tech", "Consulting"],
-          target_readiness: 85,
-          available_hours_per_day: 2.0,
-        },
-      });
-      toast.success("AI learning roadmap recalculated based on your latest performance!");
+      const roadmap = buildRuleBasedRoadmap(dashboard, studentId);
+      onRoadmapUpdate?.(roadmap);
+      toast.success("Learning roadmap updated from your latest performance.");
     } catch (err: any) {
       toast.error(err.message || "Failed to update roadmap");
     } finally {
@@ -112,9 +115,9 @@ export function LearningRoadmap({ roadmapData, studentId }: LearningRoadmapProps
               <Zap className="h-4 w-4 text-warning" />
               Plan Completion
             </span>
-            <span className="font-mono text-foreground">{Math.round(roadmapData.completion_progress)}%</span>
+            <span className="font-mono text-foreground">{Math.round(safeNum(roadmapData.completion_progress))}%</span>
           </div>
-          <Progress value={roadmapData.completion_progress} className="h-2 rounded-full" />
+          <Progress value={safeNum(roadmapData.completion_progress)} className="h-2 rounded-full" />
         </div>
       </CardHeader>
 

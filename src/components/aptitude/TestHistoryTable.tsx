@@ -22,6 +22,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import type { AptitudeAttemptResponse } from "@/types/aptitude";
+import { safeNum } from "@/lib/aptitude-analytics";
 
 interface TestHistoryTableProps {
   attempts: AptitudeAttemptResponse[];
@@ -53,8 +54,8 @@ export function TestHistoryTable({ attempts = [] }: TestHistoryTableProps) {
   // Extract unique topics for filter dropdown
   const uniqueTopics = Array.from(new Set(attempts.map((a) => a.topic)));
 
-  const getDifficultyColor = (diff: string) => {
-    switch (diff.toLowerCase()) {
+  const getDifficultyColor = (diff?: string) => {
+    switch ((diff || "Medium").toLowerCase()) {
       case "easy":
         return "bg-success/5 text-success border-success/20";
       case "hard":
@@ -64,7 +65,8 @@ export function TestHistoryTable({ attempts = [] }: TestHistoryTableProps) {
     }
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "--";
     return new Date(dateStr).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
@@ -132,7 +134,7 @@ export function TestHistoryTable({ attempts = [] }: TestHistoryTableProps) {
                   <TableHead className="font-display font-bold text-xs text-center">Score</TableHead>
                   <TableHead className="font-display font-bold text-xs text-center">Accuracy</TableHead>
                   <TableHead className="font-display font-bold text-xs text-center">Breakdown</TableHead>
-                  <TableHead className="font-display font-bold text-xs text-center">Avg Speed</TableHead>
+                  <TableHead className="font-display font-bold text-xs text-center">Questions/Min</TableHead>
                   <TableHead className="font-display font-bold text-xs text-center">Difficulty</TableHead>
                 </TableRow>
               </TableHeader>
@@ -140,7 +142,7 @@ export function TestHistoryTable({ attempts = [] }: TestHistoryTableProps) {
                 {paginatedAttempts.map((attempt) => (
                   <TableRow key={attempt.id} className="hover:bg-muted/5">
                     <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                      {formatDate(attempt.test_date || attempt.created_at)}
+                      {formatDate(attempt.created_at)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       <div className="font-semibold text-xs text-foreground">
@@ -151,40 +153,54 @@ export function TestHistoryTable({ attempts = [] }: TestHistoryTableProps) {
                       )}
                     </TableCell>
                     <TableCell className="text-center font-semibold font-mono text-xs text-foreground">
-                      {attempt.score}/{attempt.max_score}
+                      {Math.round(safeNum(attempt.accuracy))}/100
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge
                         variant="outline"
                         className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                          attempt.accuracy >= 80
+                          (attempt.accuracy ?? 0) >= 80
                             ? "bg-success/5 text-success border-success/20"
-                            : attempt.accuracy >= 60
+                            : (attempt.accuracy ?? 0) >= 60
                             ? "bg-warning/5 text-warning border-warning/20"
                             : "bg-destructive/5 text-destructive border-destructive/20"
                         }`}
                       >
-                        {attempt.accuracy}%
+                        {Math.round(safeNum(attempt.accuracy))}%
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       <div className="flex items-center justify-center gap-2.5 text-[10px] font-semibold text-muted-foreground">
                         <span className="flex items-center gap-0.5 text-success">
                           <Check className="h-3 w-3" />
-                          {attempt.correct_answers}
+                          {attempt.correct_answers ?? 0}
                         </span>
                         <span className="flex items-center gap-0.5 text-destructive">
                           <X className="h-3 w-3" />
-                          {attempt.wrong_answers}
+                          {attempt.wrong_answers ?? 0}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="text-center font-mono text-xs text-foreground">
-                      {attempt.average_solving_time ? `${attempt.average_solving_time}s/q` : "--"}
+                      {(() => {
+                        const totalSec = safeNum(attempt.total_time_seconds ?? attempt.average_solving_time);
+                        const qs = safeNum(attempt.total_questions);
+                        if (totalSec > 0 && qs > 0) {
+                          const qpm = (qs / (totalSec / 60));
+                          return `${qpm.toFixed(1)} q/min`;
+                        }
+                        // fallback: derive from avg_speed (stored as seconds/question)
+                        const avgSpeedSec = safeNum(attempt.avg_speed ?? attempt.average_solving_time);
+                        if (avgSpeedSec > 0 && qs > 0) {
+                          const qpm = 60 / avgSpeedSec;
+                          return `${qpm.toFixed(1)} q/min`;
+                        }
+                        return "--";
+                      })()}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline" className={`rounded-lg px-2 py-0.5 text-[10px] uppercase font-bold ${getDifficultyColor(attempt.difficulty_level)}`}>
-                        {attempt.difficulty_level}
+                      <Badge variant="outline" className={`rounded-lg px-2 py-0.5 text-[10px] uppercase font-bold ${getDifficultyColor(attempt.difficulty)}`}>
+                        {attempt.difficulty ?? "Medium"}
                       </Badge>
                     </TableCell>
                   </TableRow>

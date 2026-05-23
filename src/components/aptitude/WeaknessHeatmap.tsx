@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, CheckCircle2, CircleDot, HelpCircle } from "lucide-react";
 import type { TopicAnalytics } from "@/types/aptitude";
+import { safeNum } from "@/lib/aptitude-analytics";
 
 interface WeaknessHeatmapProps {
   topicBreakdown: TopicAnalytics[];
@@ -52,7 +53,11 @@ export function WeaknessHeatmap({ topicBreakdown = [] }: WeaknessHeatmapProps) {
       <CardContent className="pt-2">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {topicBreakdown.map((item) => {
-            const status = getStatusInfo(item.mastery_score);
+            const hasAttempts = safeNum(item.total_attempts) > 0;
+            const mastery = safeNum(item.mastery_score);
+            const accuracy = safeNum(item.average_accuracy);
+            const speed = safeNum(item.average_speed);
+            const status = getStatusInfo(mastery);
             return (
               <div
                 key={item.topic}
@@ -75,26 +80,29 @@ export function WeaknessHeatmap({ topicBreakdown = [] }: WeaknessHeatmapProps) {
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Mastery Score</span>
                       <span className="font-semibold font-mono text-foreground">
-                        {Math.round(item.mastery_score)}/100
+                        {hasAttempts ? `${Math.round(mastery)}/100` : "0/100"}
                       </span>
                     </div>
-                    <Progress value={item.mastery_score} className="h-1.5 rounded-full" />
+                    <Progress value={hasAttempts ? mastery : 0} className="h-1.5 rounded-full" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-border/20 text-[11px]">
                     <div>
                       <span className="text-muted-foreground block">Avg Accuracy</span>
                       <span className="font-semibold font-mono text-foreground">
-                        {Math.round(item.average_accuracy)}%
+                        {hasAttempts ? `${Math.round(accuracy)}%` : "0%"}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground block">Speed/Question</span>
                       <span className="font-semibold font-mono text-foreground">
-                        {Math.round(item.average_speed)}s
+                        {hasAttempts ? `${Math.round(speed)}s` : "0s"}
                       </span>
                     </div>
                   </div>
+                  {!hasAttempts && (
+                    <p className="mt-2 text-[10px] text-muted-foreground italic">No attempts yet</p>
+                  )}
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-border/20 text-[11px] text-muted-foreground/90 italic">

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Award, Briefcase, ChevronRight, Compass } from "lucide-react";
+import { safeNum } from "@/lib/aptitude-analytics";
 
 interface ReadinessScoreCardProps {
   score: number;
@@ -19,10 +20,10 @@ export function ReadinessScoreCard({
   companyReadiness = {},
   topicBreakdown = [],
 }: ReadinessScoreCardProps) {
-  // Simple radius / circumference math for SVG Circle
+  const safeScore = Math.round(safeNum(score));
   const radius = 60;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (score / 100) * circumference;
+  const strokeDashoffset = circumference - (safeScore / 100) * circumference;
 
   // Determine feedback based on score
   const getReadinessColor = (val: number) => {
@@ -64,7 +65,7 @@ export function ReadinessScoreCard({
                 cx="72"
                 cy="72"
                 r={radius}
-                className={`transition-all duration-1000 ease-out ${getCircleStrokeColor(score)}`}
+                className={`transition-all duration-1000 ease-out ${getCircleStrokeColor(safeScore)}`}
                 strokeWidth="10"
                 fill="transparent"
                 strokeDasharray={circumference}
@@ -74,7 +75,7 @@ export function ReadinessScoreCard({
             </svg>
             <div className="absolute text-center">
               <span className="font-display text-4xl font-extrabold tracking-tight text-foreground">
-                {score}%
+                {safeScore}%
               </span>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
                 Ready
@@ -82,8 +83,8 @@ export function ReadinessScoreCard({
             </div>
           </div>
           <div className="mt-6 flex flex-col items-center">
-            <Badge className={`rounded-full px-3 py-1 font-semibold ${getReadinessColor(score)}`}>
-              {score >= 80 ? "Superb Preparation" : score >= 60 ? "Needs Polish" : "Critical Focus Needed"}
+            <Badge className={`rounded-full px-3 py-1 font-semibold ${getReadinessColor(safeScore)}`}>
+              {safeScore >= 80 ? "Superb Preparation" : safeScore >= 60 ? "Needs Polish" : "Critical Focus Needed"}
             </Badge>
             <p className="mt-3 text-center text-xs text-muted-foreground">
               Based on your accuracy, speed, and practice consistency across 5 core topics.
@@ -110,13 +111,13 @@ export function ReadinessScoreCard({
                       <ChevronRight className="h-3.5 w-3.5 text-primary/60" />
                       {company}
                     </span>
-                    <span className={readinessScore >= 80 ? "text-success" : readinessScore >= 60 ? "text-warning" : "text-destructive"}>
-                      {readinessScore}% Match
+                    <span className={safeNum(readinessScore) >= 80 ? "text-success" : safeNum(readinessScore) >= 60 ? "text-warning" : "text-destructive"}>
+                      {Math.round(safeNum(readinessScore))}% Match
                     </span>
                   </div>
                   <div className="relative">
                     <Progress
-                      value={readinessScore}
+                      value={safeNum(readinessScore)}
                       className="h-2 rounded-full"
                     />
                   </div>

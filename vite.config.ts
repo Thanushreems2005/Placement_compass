@@ -13,15 +13,26 @@ export default defineConfig({
   ],
   build: {
     outDir: "dist/client"
-  }
-  ,
+  },
   server: {
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
-        logLevel: 'debug'
+        proxyTimeout: 10000,
+        timeout: 10000,
+        configure: (proxy) => {
+          // Suppress ECONNREFUSED noise during backend startup
+          proxy.on('error', (err, _req, res) => {
+            if ((err as NodeJS.ErrnoException).code === 'ECONNREFUSED') {
+              if (res && !res.headersSent && typeof (res as any).writeHead === 'function') {
+                (res as any).writeHead(502, { 'Content-Type': 'application/json' });
+                (res as any).end(JSON.stringify({ detail: 'Backend starting up, please retry.' }));
+              }
+            }
+          });
+        },
       }
     }
   }

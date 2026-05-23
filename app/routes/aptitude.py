@@ -17,15 +17,29 @@ from app.services import aptitude_service
 router = APIRouter(prefix="/aptitude", tags=["aptitude"])
 
 
-@router.post("/attempts", response_model=AptitudeAttemptResponse, status_code=status.HTTP_201_CREATED)
+def _submit_attempt(data: AptitudeAttemptCreate, db: Session) -> AptitudeAttemptResponse:
+    return aptitude_service.create_attempt(db, data)
+
+
+@router.post("/attempt", response_model=AptitudeAttemptResponse, status_code=status.HTTP_201_CREATED)
 def submit_attempt(data: AptitudeAttemptCreate, db: Session = Depends(get_db)):
-    """Submit a new aptitude attempt, updating progress and recalculating placement readiness."""
     try:
-        return aptitude_service.create_attempt(db, data)
+        return _submit_attempt(data, db)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to submit attempt: {str(e)}"
+            detail=f"Failed to submit attempt: {str(e)}",
+        )
+
+
+@router.post("/attempts", response_model=AptitudeAttemptResponse, status_code=status.HTTP_201_CREATED)
+def submit_attempts(data: AptitudeAttemptCreate, db: Session = Depends(get_db)):
+    try:
+        return _submit_attempt(data, db)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to submit attempt: {str(e)}",
         )
 
 

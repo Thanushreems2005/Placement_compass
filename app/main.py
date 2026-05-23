@@ -1,10 +1,22 @@
 import logging
 import os
+# Load .env early — before any other imports — so env vars are available
+# regardless of how the process is launched (concurrently, direct, etc.)
+from pathlib import Path as _Path
+try:
+    from dotenv import load_dotenv as _load_dotenv
+    _env_file = _Path(__file__).resolve().parent.parent / ".env"
+    if _env_file.exists():
+        _load_dotenv(dotenv_path=_env_file, override=False)
+except ImportError:
+    pass  # python-dotenv not installed; rely on shell environment
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health, aptitude
+from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health
+from app.routes import aptitude_v2
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.hardening import RequestIDMiddleware, TimeoutMiddleware
 from app.core.exceptions import global_exception_handler, not_found_exception_handler, NotFoundException
@@ -19,9 +31,15 @@ async def lifespan(app: FastAPI):
     logger = logging.getLogger("startup")
     logger.info("Executing Enterprise-Grade Startup Diagnostics...")
     
-    # 1. Verify Environment Variables
-    required_vars = ["SUPABASE_URL", "DATABASE_URL"]
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    # 1. Verify Environment Variables (read from pydantic settings, which loads .env)
+    missing_vars = []
+    if not settings.DATABASE_URL:
+        missing_vars.append("DATABASE_URL")
+    # SUPABASE_URL is read directly from os.environ after pydantic loads it
+    import os
+    supabase_url = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
+    if not supabase_url:
+        missing_vars.append("SUPABASE_URL")
     if missing_vars:
         logger.warning(f"Startup diagnostic check flagged missing variables: {missing_vars}")
     else:
@@ -91,7 +109,7 @@ app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
 app.include_router(notifications.router, prefix=settings.API_V1_STR)
 app.include_router(health.router, prefix=settings.API_V1_STR)
-app.include_router(aptitude.router, prefix=settings.API_V1_STR)
+app.include_router(aptitude_v2.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

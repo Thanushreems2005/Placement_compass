@@ -17,6 +17,7 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Activity, Gauge, TrendingUp } from "lucide-react";
 import type { TopicAnalytics, TrendEntry } from "@/types/aptitude";
+import { safeNum } from "@/lib/aptitude-analytics";
 
 interface AccuracySpeedChartProps {
   topicBreakdown: TopicAnalytics[];
@@ -28,12 +29,14 @@ export function AccuracySpeedChart({
   improvementTrend = [],
 }: AccuracySpeedChartProps) {
   // Scatter Plot Data: Speed vs Accuracy
-  const scatterData = topicBreakdown.map((item) => ({
-    name: item.topic.replace(" Aptitude", "").replace(" Reasoning", "").replace(" Ability", ""),
-    Speed: Math.round(item.average_speed), // X Axis (seconds)
-    Accuracy: Math.round(item.average_accuracy), // Y Axis (%)
-    Attempts: item.total_attempts, // Size (Z)
-  }));
+  const scatterData = topicBreakdown
+    .filter((item) => safeNum(item.total_attempts) > 0)
+    .map((item) => ({
+      name: item.topic.replace(" Aptitude", "").replace(" Reasoning", "").replace(" Ability", ""),
+      Speed: Math.round(safeNum(item.average_speed)),
+      Accuracy: Math.round(safeNum(item.average_accuracy)),
+      Attempts: safeNum(item.total_attempts),
+    }));
 
   // Improvement Trend Data: flattening and formatting dates if multiple topics exist
   // To avoid cluttered charts, we select the top topics or display them as multiple lines
@@ -62,7 +65,7 @@ export function AccuracySpeedChart({
         if (!dateMap[dateStr]) {
           dateMap[dateStr] = {};
         }
-        dateMap[dateStr][shortTopic] = Math.round(entry.accuracy);
+        dateMap[dateStr][shortTopic] = Math.round(safeNum(entry.accuracy));
       });
     });
 
@@ -215,7 +218,7 @@ export function AccuracySpeedChart({
                             {payload.map((p, i) => (
                               <p key={i} style={{ color: p.color }} className="flex items-center gap-2">
                                 <span className="font-semibold">{p.name}:</span>
-                                <span className="font-mono">{p.value}%</span>
+                                <span className="font-mono">{safeNum(p.value)}%</span>
                               </p>
                             ))}
                           </div>

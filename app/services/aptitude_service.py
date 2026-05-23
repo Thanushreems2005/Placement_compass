@@ -1,4 +1,6 @@
 import logging
+import math
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
@@ -10,8 +12,11 @@ from app.models.aptitude import (
     RecommendationHistory, ReadinessScore,
 )
 from app.schemas.aptitude import (
-    AptitudeAttemptCreate, TopicAnalytics,
-    OverallAnalyticsResponse, DashboardResponse,
+    AptitudeAttemptCreate,
+    AptitudeAttemptResponse,
+    TopicAnalytics,
+    OverallAnalyticsResponse,
+    DashboardResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,10 +30,151 @@ TOPIC_WEIGHTS: Dict[str, str] = {
 }
 WEAK_THRESHOLD = 55.0
 STRONG_THRESHOLD = 80.0
+ACCURACY_WEAK_THRESHOLD = 60.0
+SPEED_SLOW_THRESHOLD = 45.0
 
 
-def create_attempt(db: Session, data: AptitudeAttemptCreate) -> AptitudeAttempt:
-    attempt = AptitudeAttempt(**data.model_dump(exclude_none=True))
+def _safe_float(value: Any, default: float = 0.0) -> float:
+    if value is None:
+        return default
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return default
+    if math.isnan(number) or math.isinf(number):
+        return default
+    return number
+
+
+def _safe_int(value: Any, default: int = 0) -> int:
+    return int(_safe_float(value, float(default)))
+
+
+def _normalize_topic_analytics(topic: TopicAnalytics) -> TopicAnalytics:
+    total_attempts = _safe_int(topic.total_attempts)
+    mastery = _safe_float(topic.mastery_score)
+    accuracy = _safe_float(topic.average_accuracy)
+    speed = _safe_float(topic.average_speed)
+    readiness = _safe_float(topic.readiness_percentage)
+    trend = _safe_float(topic.improvement_trend)
+
+    if total_attempts <= 0:
+        mastery = 0.0
+        accuracy = 0.0
+        speed = 0.0
+        readiness = 0.0
+        trend = 0.0
+        is_weak = False
+        is_strong = False
+    else:
+        is_weak = accuracy < ACCURACY_WEAK_THRESHOLD
+        is_strong = accuracy >= STRONG_THRESHOLD
+
+    return TopicAnalytics(
+        topic=topic.topic,
+        mastery_score=round(mastery, 2),
+        average_accuracy=round(accuracy, 2),
+        average_speed=round(speed, 2),
+        total_attempts=total_attempts,
+        improvement_trend=round(trend, 2),
+        readiness_percentage=round(readiness, 2),
+        is_weak=is_weak,
+        is_strong=is_strong,
+    )
+
+
+def _build_topic_analytics(db: Session, student_id: str) -> List[TopicAnalytics]:
+    progresses = {p.topic: p for p in get_topic_progress_all(db, student_id)}
+    attempt_rows = (
+        db.query(AptitudeAttempt)
+        .filter(AptitudeAttempt.student_id == student_id)
+        .all()
+    )
+    attempts_by_topic: Dict[str, List[AptitudeAttempt]] = defaultdict(list)
+    for row in attempt_rows:
+        attempts_by_topic[row.topic].append(row)
+
+    analytics: List[TopicAnalytics] = []
+    for topic in TOPIC_WEIGHTS:
+        progress = progresses.get(topic)
+        attempts = attempts_by_topic.get(topic, [])
+        total_attempts = len(attempts) if attempts else _safe_int(progress.total_attempts if progress else 0)
+
+        if attempts:
+            average_accuracy = sum(_safe_float(a.accuracy) for a in attempts) / len(attempts)
+            speeds = [_safe_float(a.average_solving_time) for a in attempts if a.average_solving_time is not None]
+            average_speed = sum(speeds) / len(speeds) if speeds else 0.0
+        elif progress:
+            average_accuracy = _safe_float(progress.average_accuracy)
+            average_speed = _safe_float(progress.average_speed)
+        else:
+            average_accuracy = 0.0
+            average_speed = 0.0
+
+        if progress and total_attempts > 0:
+            mastery_score = _safe_float(progress.mastery_score)
+            readiness_percentage = _safe_float(progress.readiness_percentage)
+            improvement_trend = _safe_float(progress.improvement_trend)
+        elif total_attempts > 0:
+            speed_bonus = max(0.0, (60.0 - average_speed) / 60.0) * 10.0 if average_speed > 0 else 0.0
+            mastery_score = min(100.0, average_accuracy + speed_bonus)
+            readiness_percentage = min(
+                100.0,
+                mastery_score * 0.7 + min(100.0, total_attempts * 2.0) * 0.3,
+            )
+            improvement_trend = 0.0
+        else:
+            mastery_score = 0.0
+            readiness_percentage = 0.0
+            improvement_trend = 0.0
+
+        analytics.append(
+            _normalize_topic_analytics(
+                TopicAnalytics(
+                    topic=topic,
+                    mastery_score=mastery_score,
+                    average_accuracy=average_accuracy,
+                    average_speed=average_speed,
+                    total_attempts=total_attempts,
+                    improvement_trend=improvement_trend,
+                    readiness_percentage=readiness_percentage,
+                    is_weak=False,
+                    is_strong=False,
+                )
+            )
+        )
+
+    return analytics
+
+
+def to_attempt_response(attempt: AptitudeAttempt) -> AptitudeAttemptResponse:
+    difficulty = attempt.difficulty_level or "Medium"
+    speed = _safe_float(attempt.average_solving_time, 0.0) or None
+    created_at = attempt.created_at or attempt.test_date
+    test_date = attempt.test_date or created_at
+    return AptitudeAttemptResponse(
+        id=attempt.id,
+        student_id=attempt.student_id,
+        topic=attempt.topic,
+        subtopic=attempt.subtopic,
+        score=_safe_float(attempt.score),
+        accuracy=_safe_float(attempt.accuracy),
+        speed=speed,
+        difficulty=difficulty,
+        created_at=created_at,
+        max_score=_safe_float(attempt.max_score, 100.0),
+        questions_attempted=_safe_int(attempt.questions_attempted, 1),
+        correct_answers=_safe_int(attempt.correct_answers),
+        wrong_answers=_safe_int(attempt.wrong_answers),
+        average_solving_time=speed,
+        difficulty_level=difficulty,
+        test_date=test_date,
+    )
+
+
+def create_attempt(db: Session, data: AptitudeAttemptCreate) -> AptitudeAttemptResponse:
+    payload = data.model_dump(exclude={"speed", "difficulty"}, exclude_none=True)
+    attempt = AptitudeAttempt(**payload)
     db.add(attempt)
     db.flush()
     _update_topic_progress(db, data)
@@ -36,17 +182,18 @@ def create_attempt(db: Session, data: AptitudeAttemptCreate) -> AptitudeAttempt:
     db.commit()
     db.refresh(attempt)
     logger.info(f"Attempt {attempt.id} created for student {data.student_id}")
-    return attempt
+    return to_attempt_response(attempt)
 
 
-def get_attempts(db: Session, student_id: str, limit: int = 50) -> List[AptitudeAttempt]:
-    return (
+def get_attempts(db: Session, student_id: str, limit: int = 50) -> List[AptitudeAttemptResponse]:
+    rows = (
         db.query(AptitudeAttempt)
         .filter(AptitudeAttempt.student_id == student_id)
         .order_by(desc(AptitudeAttempt.test_date))
         .limit(limit)
         .all()
     )
+    return [to_attempt_response(row) for row in rows]
 
 
 def get_topic_progress_all(db: Session, student_id: str) -> List[TopicProgress]:
@@ -54,39 +201,40 @@ def get_topic_progress_all(db: Session, student_id: str) -> List[TopicProgress]:
 
 
 def get_overall_analytics(db: Session, student_id: str) -> OverallAnalyticsResponse:
-    progresses = get_topic_progress_all(db, student_id)
+    topic_analytics = _build_topic_analytics(db, student_id)
     attempts = get_attempts(db, student_id, limit=200)
-    topic_analytics, weak, strong = [], [], []
-
-    for p in progresses:
-        is_weak = p.mastery_score < WEAK_THRESHOLD
-        is_strong = p.mastery_score >= STRONG_THRESHOLD
-        ta = TopicAnalytics(
-            topic=p.topic, mastery_score=p.mastery_score,
-            average_accuracy=p.average_accuracy, average_speed=p.average_speed,
-            total_attempts=p.total_attempts, improvement_trend=p.improvement_trend,
-            readiness_percentage=p.readiness_percentage, is_weak=is_weak, is_strong=is_strong,
-        )
-        topic_analytics.append(ta)
-        if is_weak: weak.append(p.topic)
-        if is_strong: strong.append(p.topic)
+    weak = [t.topic for t in topic_analytics if t.is_weak]
+    strong = [t.topic for t in topic_analytics if t.is_strong]
 
     readiness_rec = db.query(ReadinessScore).filter(
         ReadinessScore.student_id == student_id
     ).order_by(desc(ReadinessScore.updated_at)).first()
 
-    overall_accuracy = round(sum(a.accuracy for a in attempts) / max(1, len(attempts)), 2)
-    overall_speed = round(
-        sum(a.average_solving_time or 0 for a in attempts) / max(1, len(attempts)), 2
-    )
+    if attempts:
+        overall_accuracy = round(
+            sum(_safe_float(a.accuracy) for a in attempts) / len(attempts), 2
+        )
+        speeds = [
+            _safe_float(a.average_solving_time)
+            for a in attempts
+            if a.average_solving_time is not None
+        ]
+        overall_speed = round(sum(speeds) / len(speeds), 2) if speeds else 0.0
+    else:
+        overall_accuracy = 0.0
+        overall_speed = 0.0
 
     return OverallAnalyticsResponse(
-        student_id=student_id, total_attempts=len(attempts),
-        overall_accuracy=overall_accuracy, overall_speed=overall_speed,
-        overall_readiness=readiness_rec.overall_score if readiness_rec else 0.0,
-        topics=topic_analytics, weak_areas=weak, strong_areas=strong,
-        streak_days=readiness_rec.current_streak if readiness_rec else 0,
-        xp_points=readiness_rec.xp_points if readiness_rec else 0,
+        student_id=student_id,
+        total_attempts=len(attempts),
+        overall_accuracy=overall_accuracy,
+        overall_speed=overall_speed,
+        overall_readiness=_safe_float(readiness_rec.overall_score if readiness_rec else 0.0),
+        topics=topic_analytics,
+        weak_areas=weak,
+        strong_areas=strong,
+        streak_days=_safe_int(readiness_rec.current_streak if readiness_rec else 0),
+        xp_points=_safe_int(readiness_rec.xp_points if readiness_rec else 0),
         badges=readiness_rec.badges if readiness_rec else [],
         last_updated=datetime.utcnow(),
     )
@@ -105,24 +253,23 @@ def get_dashboard_data(db: Session, student_id: str) -> DashboardResponse:
     analytics = get_overall_analytics(db, student_id)
     recent = get_attempts(db, student_id, limit=10)
     readiness = get_readiness_score(db, student_id)
-    heatmap = _build_consistency_heatmap(db, student_id)
     trend = _build_improvement_trend(db, student_id)
+
+    readiness_score = _safe_float(
+        readiness.overall_score if readiness else analytics.overall_readiness
+    )
 
     return DashboardResponse(
         student_id=student_id,
-        readiness_score=readiness.overall_score if readiness else 0.0,
-        overall_accuracy=analytics.overall_accuracy,
-        overall_speed=analytics.overall_speed,
-        total_tests=analytics.total_attempts,
-        streak_days=analytics.streak_days,
-        xp_points=analytics.xp_points,
-        badges=analytics.badges,
-        topic_breakdown=analytics.topics,
-        recent_attempts=recent,
+        readiness_score=readiness_score,
+        xp=_safe_int(analytics.xp_points),
+        streak=_safe_int(analytics.streak_days),
+        total_tests=_safe_int(analytics.total_attempts),
         weak_areas=analytics.weak_areas,
         strong_areas=analytics.strong_areas,
-        ai_insight=_generate_quick_insight(analytics),
-        consistency_heatmap=heatmap,
+        topic_breakdown=analytics.topics,
+        recent_attempts=recent,
+        ai_insight=_generate_coach_insight(analytics),
         improvement_trend=trend,
     )
 
@@ -188,11 +335,13 @@ def _update_topic_progress(db: Session, data: AptitudeAttemptCreate) -> None:
         progress = TopicProgress(student_id=data.student_id, topic=data.topic)
         db.add(progress)
 
-    n = progress.total_attempts
-    progress.average_accuracy = round((progress.average_accuracy * n + data.accuracy) / (n + 1), 2)
-    if data.average_solving_time:
+    n = _safe_int(progress.total_attempts)
+    prev_accuracy = _safe_float(progress.average_accuracy)
+    progress.average_accuracy = round((prev_accuracy * n + _safe_float(data.accuracy)) / (n + 1), 2)
+    if data.average_solving_time is not None:
+        prev_speed = _safe_float(progress.average_speed)
         progress.average_speed = round(
-            (progress.average_speed * n + data.average_solving_time) / (n + 1), 2
+            (prev_speed * n + _safe_float(data.average_solving_time)) / (n + 1), 2
         )
     progress.total_attempts += 1
     progress.total_questions += data.questions_attempted
@@ -338,26 +487,47 @@ def _build_improvement_trend(db: Session, student_id: str) -> List[Dict]:
         if rows:
             trend.append({
                 "topic": topic,
-                "data": [{"date": str(r.test_date.date()), "accuracy": r.accuracy} for r in rows],
+                "data": [
+                    {
+                        "date": str(r.test_date.date()),
+                        "accuracy": _safe_float(r.accuracy),
+                    }
+                    for r in rows
+                ],
             })
     return trend
 
 
-def _generate_quick_insight(analytics: OverallAnalyticsResponse) -> str:
-    if not analytics.topics:
-        return "Start practicing to get personalized AI insights!"
-    if analytics.weak_areas:
-        top_weak = analytics.weak_areas[0]
-        return (
-            f"Focus on {top_weak} — it's your highest impact improvement area. "
-            f"Just 30 minutes daily can boost your readiness score by up to 15 points."
+def _generate_coach_insight(analytics: OverallAnalyticsResponse) -> str:
+    if analytics.total_attempts <= 0:
+        return "Log your first practice attempt to unlock personalized coaching recommendations."
+
+    practiced = [t for t in analytics.topics if t.total_attempts > 0]
+    if not practiced:
+        return "Log your first practice attempt to unlock personalized coaching recommendations."
+
+    parts: List[str] = []
+    weak = [t for t in practiced if t.average_accuracy < ACCURACY_WEAK_THRESHOLD]
+    slow = [t for t in practiced if t.average_speed > SPEED_SLOW_THRESHOLD]
+    strong = [t for t in practiced if t.is_strong]
+
+    if weak:
+        parts.append(
+            f"Revise {weak[0].topic} — accuracy is below 60%. "
+            "Allocate 30 minutes daily to foundational drills."
         )
-    if analytics.overall_accuracy >= 85:
-        return (
-            f"Excellent work! Your {analytics.overall_accuracy:.1f}% accuracy puts you in the "
-            f"top tier. Focus on speed optimization next."
+    if slow:
+        parts.append(
+            f"Practice timed sets in {slow[0].topic} — average speed exceeds 45s per question."
         )
-    return (
-        f"You're at {analytics.overall_readiness:.1f}% readiness. Consistent daily practice "
-        f"in your weak areas will accelerate your progress significantly."
-    )
+    if strong:
+        parts.append(
+            f"Maintain your streak in {strong[0].topic} — this is a placement-ready strength."
+        )
+    if not parts:
+        parts.append(
+            f"Continue consistent practice. Overall readiness is "
+            f"{_safe_float(analytics.overall_readiness):.0f}%."
+        )
+
+    return " ".join(parts)
