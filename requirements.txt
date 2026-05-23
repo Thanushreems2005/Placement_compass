@@ -24,3 +24,5 @@ tqdm>=4.66.0
 tenacity>=8.2.0
 google-generativeai>=0.8.0
 langchain-google-genai>=0.0.1
+httpx>=0.24.0
+reportlab
