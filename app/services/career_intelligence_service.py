@@ -1,4 +1,5 @@
 import hashlib
+import json
 import logging
 import re
 import uuid
@@ -97,6 +98,54 @@ HIGH_VALUE_TECH_PATTERNS = [
     "tableau",
     "system design",
     "communication",
+]
+
+PLACEMENT_COMPANY_TARGETS: List[Dict[str, Any]] = [
+    {
+        "company_id": 9001,
+        "company_name": "Oracle India Private Limited",
+        "required_skills": ["java", "sql", "dsa", "python", "react", "cloud", "communication"],
+    },
+    {
+        "company_id": 9002,
+        "company_name": "Google LLC (Subsidiary of Alphabet Inc.)",
+        "required_skills": ["dsa", "python", "java", "javascript", "cloud", "system design", "communication"],
+    },
+    {
+        "company_id": 9003,
+        "company_name": "Apple Inc.",
+        "required_skills": ["dsa", "javascript", "python", "communication", "system design", "product thinking"],
+    },
+    {
+        "company_id": 9004,
+        "company_name": "Mitsubishi UFJ Financial Group, Inc.",
+        "required_skills": ["data analytics", "python", "sql", "power bi", "excel", "communication"],
+    },
+    {
+        "company_id": 9005,
+        "company_name": "Seagate Technology Holdings plc",
+        "required_skills": ["python", "sql", "data analytics", "machine learning", "automation", "communication"],
+    },
+    {
+        "company_id": 9006,
+        "company_name": "Ather Energy Limited",
+        "required_skills": ["python", "data analytics", "automation", "sql", "machine learning", "communication"],
+    },
+    {
+        "company_id": 9007,
+        "company_name": "Tata Consultancy Services",
+        "required_skills": ["java", "sql", "python", "web development", "communication", "problem solving"],
+    },
+    {
+        "company_id": 9008,
+        "company_name": "Infosys Limited",
+        "required_skills": ["java", "python", "sql", "html", "css", "communication", "problem solving"],
+    },
+    {
+        "company_id": 9009,
+        "company_name": "Accenture Solutions Private Limited",
+        "required_skills": ["react", "javascript", "sql", "cloud", "data analytics", "communication"],
+    },
 ]
 
 
@@ -658,10 +707,6 @@ class CareerIntelligenceService:
     def _resolve_company_target(
         self, company_id: Optional[int], company_name: Optional[str]
     ) -> Optional[Dict[str, Any]]:
-        supabase_target = self._resolve_supabase_company(company_id, company_name)
-        if supabase_target:
-            return supabase_target
-
         query = self.db.query(Company)
         if company_id is not None:
             company = query.filter(Company.id == company_id).first()
@@ -669,35 +714,57 @@ class CareerIntelligenceService:
             company = query.filter(Company.name.ilike(f"%{company_name}%")).first()
         else:
             company = None
-        if not company:
-            return None
+        if company:
+            return {
+                "company_id": company.id,
+                "company_name": company.name,
+                "required_skills": _infer_skills_from_text(
+                    " ".join([company.name or "", company.industry or "", company.description or ""])
+                )
+                or _generic_company_skills(company.name),
+                "source": "local_sqlalchemy",
+            }
 
-        return {
-            "company_id": company.id,
-            "company_name": company.name,
-            "required_skills": _infer_skills_from_text(
-                " ".join([company.name or "", company.industry or "", company.description or ""])
-            ),
-            "source": "local_sqlalchemy",
-        }
+        cached_target = self._resolve_field_cache_company(company_name)
+        if cached_target:
+            return cached_target
+
+        bundled_target = self._resolve_bundled_company(company_id, company_name)
+        if bundled_target:
+            return bundled_target
+
+        supabase_target = self._resolve_supabase_company(company_id, company_name)
+        if supabase_target:
+            return supabase_target
+
+        return None
 
     def _list_company_targets(self, limit: int) -> List[Dict[str, Any]]:
-        targets = self._list_supabase_companies(limit)
-        if targets:
-            return targets
+        targets: List[Dict[str, Any]] = []
 
         companies = self.db.query(Company).filter(Company.is_active == True).limit(limit).all()
-        return [
+        targets.extend(
             {
                 "company_id": company.id,
                 "company_name": company.name,
                 "required_skills": _infer_skills_from_text(
                     " ".join([company.name or "", company.industry or "", company.description or ""])
-                ),
+                )
+                or _generic_company_skills(company.name),
                 "source": "local_sqlalchemy",
             }
             for company in companies
-        ]
+        )
+
+        targets.extend(self._list_field_cache_companies(limit))
+        targets.extend(self._list_bundled_companies(limit))
+
+        unique_targets = self._dedupe_company_targets(targets)
+        if len(unique_targets) >= limit:
+            return unique_targets[:limit]
+
+        unique_targets.extend(self._list_supabase_companies(limit - len(unique_targets)))
+        return self._dedupe_company_targets(unique_targets)[:limit]
 
     def _supabase_client(self):
         try:
@@ -729,12 +796,12 @@ class CareerIntelligenceService:
                     row for row in rows if normalized in str((row.get("short_json") or {}).get("name", "")).lower()
                 ]
             if not rows:
-                return None
+                return self._resolve_supabase_primary_company(company_id, company_name)
             row = rows[0]
             return self._target_from_company_json(row)
         except Exception as exc:
             logger.warning("Supabase company lookup failed: %s", exc)
-            return None
+            return self._resolve_supabase_primary_company(company_id, company_name)
 
     def _list_supabase_companies(self, limit: int) -> List[Dict[str, Any]]:
         client = self._supabase_client()
@@ -747,10 +814,49 @@ class CareerIntelligenceService:
                 .limit(limit)
                 .execute()
             )
-            return [self._target_from_company_json(row) for row in (response.data or [])]
+            targets = [self._target_from_company_json(row) for row in (response.data or [])]
+            if targets:
+                return targets
         except Exception as exc:
             logger.warning("Supabase company list failed: %s", exc)
+        return self._list_supabase_primary_companies(limit)
+
+    def _list_supabase_primary_companies(self, limit: int) -> List[Dict[str, Any]]:
+        client = self._supabase_client()
+        if client is None:
             return []
+        try:
+            response = client.table("companies").select("*").limit(limit).execute()
+            return [self._target_from_primary_company(row) for row in (response.data or [])]
+        except Exception as exc:
+            logger.warning("Supabase primary company list failed: %s", exc)
+            return []
+
+    def _resolve_supabase_primary_company(
+        self, company_id: Optional[int], company_name: Optional[str]
+    ) -> Optional[Dict[str, Any]]:
+        client = self._supabase_client()
+        if client is None:
+            return None
+        try:
+            query = client.table("companies").select("*")
+            if company_id is not None:
+                response = query.eq("company_id", company_id).limit(1).execute()
+                rows = response.data or []
+            elif company_name:
+                response = query.execute()
+                normalized = company_name.lower()
+                rows = [
+                    row
+                    for row in (response.data or [])
+                    if normalized in str(row.get("name") or row.get("company_name") or "").lower()
+                ]
+            else:
+                rows = []
+            return self._target_from_primary_company(rows[0]) if rows else None
+        except Exception as exc:
+            logger.warning("Supabase primary company lookup failed: %s", exc)
+            return None
 
     def _target_from_company_json(self, row: Dict[str, Any]) -> Dict[str, Any]:
         company_id = row.get("company_id")
@@ -776,6 +882,128 @@ class CareerIntelligenceService:
             "required_skills": sorted(skills),
             "source": "supabase_company_json",
         }
+
+    def _target_from_primary_company(self, row: Dict[str, Any]) -> Dict[str, Any]:
+        company_id = row.get("company_id") or row.get("id")
+        name = row.get("name") or row.get("company_name") or f"Company {company_id}"
+        searchable = " ".join(
+            str(row.get(key) or "")
+            for key in (
+                "name",
+                "company_name",
+                "industry",
+                "sector",
+                "description",
+                "overview",
+                "website",
+                "category",
+            )
+        )
+        skills = _infer_skills_from_text(searchable)
+        return {
+            "company_id": int(company_id) if str(company_id or "").isdigit() else None,
+            "company_name": name,
+            "required_skills": skills or _generic_company_skills(name),
+            "source": "supabase_companies",
+        }
+
+    def _list_field_cache_companies(self, limit: int) -> List[Dict[str, Any]]:
+        cache_path = Path("field_cache.json")
+        if not cache_path.exists():
+            return []
+        try:
+            cache = json.loads(cache_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            logger.warning("Field cache company list failed: %s", exc)
+            return []
+
+        targets: List[Dict[str, Any]] = []
+        for index, (cache_key, payload) in enumerate(cache.items(), start=1):
+            target = self._target_from_field_cache(cache_key, payload, index)
+            if target:
+                targets.append(target)
+            if len(targets) >= limit:
+                break
+        return targets
+
+    def _resolve_field_cache_company(self, company_name: Optional[str]) -> Optional[Dict[str, Any]]:
+        if not company_name:
+            return None
+        cache_path = Path("field_cache.json")
+        if not cache_path.exists():
+            return None
+        try:
+            cache = json.loads(cache_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            logger.warning("Field cache company lookup failed: %s", exc)
+            return None
+
+        normalized = company_name.lower()
+        for index, (cache_key, payload) in enumerate(cache.items(), start=1):
+            target = self._target_from_field_cache(cache_key, payload, index)
+            if target and normalized in target["company_name"].lower():
+                return target
+        return None
+
+    def _target_from_field_cache(
+        self, cache_key: str, payload: Dict[str, Any], index: int
+    ) -> Optional[Dict[str, Any]]:
+        fields = (payload or {}).get("fields") or {}
+
+        def value(key: str) -> Any:
+            entry = fields.get(key) or {}
+            return entry.get("value")
+
+        name = value("overview.name") or value("overview.short_name") or cache_key
+        searchable_values = []
+        for key, entry in fields.items():
+            if any(token in key for token in ("overview", "skill", "tech", "hiring", "product", "sector", "role")):
+                searchable_values.append(str((entry or {}).get("value") or ""))
+        skills = _infer_skills_from_text(" ".join(searchable_values))
+        return {
+            "company_id": index,
+            "company_name": str(name),
+            "required_skills": skills or _generic_company_skills(str(name)),
+            "source": "field_cache",
+        }
+
+    def _list_bundled_companies(self, limit: int) -> List[Dict[str, Any]]:
+        return [
+            {
+                **target,
+                "required_skills": sorted(
+                    {_normalize_skill(skill) for skill in target["required_skills"] if skill}
+                ),
+                "source": "bundled_placement_targets",
+            }
+            for target in PLACEMENT_COMPANY_TARGETS[:limit]
+        ]
+
+    def _resolve_bundled_company(
+        self, company_id: Optional[int], company_name: Optional[str]
+    ) -> Optional[Dict[str, Any]]:
+        normalized_name = _normalize_skill(company_name or "")
+        for target in self._list_bundled_companies(limit=len(PLACEMENT_COMPANY_TARGETS)):
+            if company_id is not None and target.get("company_id") == company_id:
+                return target
+            target_name = _normalize_skill(target.get("company_name") or "")
+            if normalized_name and (normalized_name in target_name or target_name in normalized_name):
+                return target
+        return None
+
+    def _dedupe_company_targets(self, targets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        unique: List[Dict[str, Any]] = []
+        seen = set()
+        for target in targets:
+            name = str(target.get("company_name") or "").strip()
+            if not name:
+                continue
+            key = _normalize_skill(name)
+            if key in seen:
+                continue
+            seen.add(key)
+            unique.append(target)
+        return unique
 
     def _job_role_skills(self, company_id: Optional[int]) -> List[str]:
         if company_id is None:
@@ -846,6 +1074,20 @@ def _infer_skills_from_text(text: str) -> List[str]:
         if re.search(rf"\b{re.escape(pattern)}\b", normalized_text):
             found.add(pattern)
     return sorted(found)
+
+
+def _generic_company_skills(company_name: str) -> List[str]:
+    normalized = _normalize_skill(company_name)
+    skills = {"communication", "problem solving", "sql"}
+    if any(token in normalized for token in ("google", "oracle", "seagate", "technology", "software")):
+        skills.update({"dsa", "python", "java", "react"})
+    if any(token in normalized for token in ("bank", "financial", "finance", "ufj")):
+        skills.update({"data analytics", "python", "excel"})
+    if any(token in normalized for token in ("energy", "ather", "electric")):
+        skills.update({"data analytics", "python", "automation"})
+    if any(token in normalized for token in ("apple", "product")):
+        skills.update({"dsa", "javascript", "communication"})
+    return sorted(skills)
 
 
 def _extract_resume_text(filename: str, content_type: str, contents: bytes) -> str:
