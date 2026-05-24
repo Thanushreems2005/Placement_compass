@@ -158,7 +158,7 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
 
   return (
     <div className="flex gap-8 h-full relative">
-      <div className="w-[65%] flex flex-col gap-6">
+      <div className="w-[75%] flex flex-col gap-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <input
@@ -180,7 +180,7 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
         )}
 
         {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {Array(6).fill(0).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
@@ -188,7 +188,7 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
         )}
 
         {!isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-8">
             {visibleMissions.map(mission => (
               <MissionCardItem 
                 key={mission.id} 
@@ -205,7 +205,7 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
         {!isLoading && hasMore && (
           <div className="flex justify-center mt-6 mb-8">
             <button 
-              onClick={() => setDisplayCount(prev => prev + 16)}
+              onClick={() => setDisplayCount(prev => prev + 15)}
               className="px-6 py-2 border rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
             >
               Load More ({missions.length - displayCount} remaining)
@@ -221,7 +221,7 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
         )}
       </div>
 
-      <div className="w-[35%] bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col sticky top-0 h-fit max-h-[calc(100vh-10rem)]">
+      <div className="w-[25%] bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col sticky top-0 h-fit max-h-[calc(100vh-10rem)]">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
           <ListChecks className="w-5 h-5 text-primary" />
           Active Missions
