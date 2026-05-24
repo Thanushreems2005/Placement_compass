@@ -76,3 +76,14 @@ class MissionService:
         )
 
 mission_service = MissionService()
+
+from LANGGRAPH.services.supabase_service import SupabaseClient
+
+async def get_companies_from_supabase():
+    try:
+        supabase = SupabaseClient().client
+        response = supabase.table("companies").select("name, website_url").execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Supabase fetch error: {e}")
+        return []

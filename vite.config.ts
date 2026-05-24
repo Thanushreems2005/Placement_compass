@@ -13,7 +13,6 @@ export default defineConfig({
   ],
   build: {
     outDir: "dist/client"
-<<<<<<< HEAD
   },
   server: {
     proxy: {
@@ -36,7 +35,5 @@ export default defineConfig({
         },
       }
     }
-=======
->>>>>>> 2bd4070965769526e2d3ed6a503120533cb93ef2
   }
 });

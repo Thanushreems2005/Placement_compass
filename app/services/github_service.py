@@ -321,3 +321,81 @@ class GitHubService:
         return missions, rate_limited
 
 github_service = GitHubService()
+
+COMPANY_TO_GITHUB_ORG = {
+    "amazon": ["aws", "awslabs", "amzn"],
+    "google": ["google", "googleapis", "googlecodelabs", "google-deepmind"],
+    "microsoft": ["microsoft", "azure-samples", "microsoftdocs", "dotnet", "aspnet"],
+    "meta": ["facebook", "facebookresearch", "facebookincubator", "pytorch"],
+    "netflix": ["netflix"],
+    "uber": ["uber", "uber-go", "uber-web", "uber-common"],
+    "airbnb": ["airbnb"],
+    "stripe": ["stripe"],
+    "shopify": ["shopify", "Shopify"],
+    "spotify": ["spotify"],
+    "apple": ["apple", "swiftlang"],
+    "twitter": ["twitter", "twitterdev", "twitterarchive"],
+    "linkedin": ["linkedin"],
+    "atlassian": ["atlassian", "atlassian-labs"],
+    "mongodb": ["mongodb", "mongodb-labs", "mongoosejs"],
+    "elastic": ["elastic", "elasticsearch"],
+    "hashicorp": ["hashicorp"],
+    "grafana": ["grafana"],
+    "vercel": ["vercel"],
+    "docker": ["docker", "docker-library", "moby"],
+    "kubernetes": ["kubernetes", "kubernetes-sigs"],
+    "pytorch": ["pytorch"],
+    "tensorflow": ["tensorflow"],
+    "openai": ["openai"],
+    "adobe": ["adobe", "adobe-fonts", "adobeio"],
+    "oracle": ["oracle", "graalvm"],
+    "ibm": ["ibm", "ibm-cloud-architecture"],
+    "samsung": ["samsung", "samsung-lancer"],
+    "salesforce": ["salesforce", "forcedotcom", "salesforcecli"],
+    "paypal": ["paypal", "paypal-examples"],
+    "twilio": ["twilio", "twilio-labs"],
+    "datadog": ["datadog"],
+    "cloudflare": ["cloudflare"],
+    "figma": ["figma"],
+    "dropbox": ["dropbox"],
+    "pinterest": ["pinterest"],
+    "lyft": ["lyft"],
+    "coinbase": ["coinbase"],
+    "databricks": ["databricks"],
+    "snowflake": ["snowflake-labs", "snowflakedb"],
+    "huggingface": ["huggingface"],
+    "anthropic": ["anthropic"],
+    "razorpay": ["razorpay"],
+    "freshworks": ["freshworks", "freshdesk"],
+    "zoho": ["zoho"],
+    "infosys": ["infosys"],
+    "thoughtworks": ["thoughtworks"],
+    "nginx": ["nginx", "nginxinc"],
+    "redis": ["redis", "redislabs"],
+    "apache": ["apache"],
+    "mozilla": ["mozilla"],
+    "jetbrains": ["jetbrains"],
+    "gradle": ["gradle"],
+    "jenkins": ["jenkinsci"],
+    "github": ["github", "github-community"],
+    "slack": ["slackhq"],
+    "notion": ["notion-so"],
+    "square": ["square", "block"],
+    "palantir": ["palantir"],
+    "tencent": ["tencent"],
+    "alibaba": ["alibaba", "alibabacloud"],
+    "bytedance": ["bytedance"],
+    "vmware": ["vmware"],
+    "pivotal": ["pivotal"],
+    "heroku": ["heroku"],
+}
+
+def get_github_orgs_for_company(company_name: str) -> list:
+    if not company_name: return []
+    key = company_name.lower().strip().replace(" ", "").replace("-", "")
+    if key in COMPANY_TO_GITHUB_ORG:
+        return COMPANY_TO_GITHUB_ORG[key]
+    for k, v in COMPANY_TO_GITHUB_ORG.items():
+        if k in key or key in k:
+            return v
+    return [company_name.lower().strip().replace(" ", "")]
