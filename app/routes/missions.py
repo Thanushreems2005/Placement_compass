@@ -192,41 +192,112 @@ def generate_fallback_seed_missions() -> list:
     for idx, (owner, repo_name, company_name) in enumerate(GUARANTEED_REPOS):
         feature_name = f"{repo_name.replace('-', ' ').title()}"
         
-        for t_idx, template in enumerate(issue_templates):
-            issue_id = f"fallback_{idx}_{t_idx}"
-            title = template["title_template"].format(feature=feature_name)
-            body = template["body_template"].format(feature=feature_name)
-            difficulty = template["difficulty"]
-            xp = template["xp"]
-            skills = template["skills"]
-            estimated_time = template["estimated_time"]
-            
-            fallback_missions.append({
-                "id": issue_id,
-                "title": title,
-                "body": body,
-                "body_preview": body[:200],
-                "html_url": f"https://github.com/{owner}/{repo_name}/issues/{1000 + t_idx}",
-                "repo_full_name": f"{owner}/{repo_name}",
-                "owner": owner,
-                "repo": repo_name,
-                "difficulty": difficulty,
-                "xp": xp,
-                "skills": skills,
-                "time_estimate": estimated_time,
-                "comments_count": 2 * t_idx + 1,
-                "created_at": "2026-05-24T00:00:00Z",
-                "company_name": company_name,
-                "owner_avatar_url": f"https://github.com/{owner}.png?size=32",
-                "issue_number": 1000 + t_idx,
-                "labels": ["good first issue" if difficulty == "Beginner" else "enhancement"],
-                "company": company_name,
-                "repo_name": f"{owner}/{repo_name}",
-                "estimated_time": estimated_time,
-                "comments": 2 * t_idx + 1,
-                "number": 1000 + t_idx
-            })
-            
+        # If it is Vercel, let's inject custom Vercel-specific templates including multiple beginner ones!
+        if company_name.lower() == "vercel":
+            current_templates = [
+                {
+                    "title": "Document configuration properties and add usage examples for Next.Js",
+                    "skills": ["TypeScript", "CSS", "Open Source"],
+                    "difficulty": "Beginner",
+                    "xp": 100,
+                    "body": "Help new contributors by documenting the newly introduced setup steps for Next.Js in the API guidelines, complete with simple code snippets.",
+                    "estimated_time": "2-4 hours"
+                },
+                {
+                    "title": "Fix broken markdown links in Next.Js starter template instructions",
+                    "skills": ["TypeScript", "Git", "Open Source"],
+                    "difficulty": "Beginner",
+                    "xp": 100,
+                    "body": "Several markdown link paths inside the default starter template's README are pointing to legacy routes. Help clean them up!",
+                    "estimated_time": "1-2 hours"
+                },
+                {
+                    "title": "Update CSS module class name selector guidelines in Next.Js styling guides",
+                    "skills": ["TypeScript", "CSS", "HTML"],
+                    "difficulty": "Beginner",
+                    "xp": 100,
+                    "body": "The styling docs currently have slightly outdated references regarding how nested CSS modules are compiled. Let's align them with Next.js 14 styles.",
+                    "estimated_time": "2-3 hours"
+                },
+                {
+                    "title": "Refactor component lifecycle hooks and optimize state updates for Next.Js",
+                    "skills": ["React", "TypeScript", "Next.js"],
+                    "difficulty": "Intermediate",
+                    "xp": 250,
+                    "body": "The state synchronization logic in Next.Js is currently re-triggering unnecessary sub-tree re-renders on every scroll transition. Refactoring lifecycle triggers will resolve this issue.",
+                    "estimated_time": "4-8 hours"
+                },
+                {
+                    "title": "Fix hydration mismatch error when using Next.Js in concurrent mode",
+                    "skills": ["React", "TypeScript", "JavaScript"],
+                    "difficulty": "Advanced",
+                    "xp": 500,
+                    "body": "A hydration mismatch occurs when pre-rendering Next.Js server-side. The client-side virtual DOM does not align with the generated HTML structure, leading to runtime console warnings and degraded performance.",
+                    "estimated_time": "8+ hours"
+                }
+            ]
+            for t_idx, t in enumerate(current_templates):
+                fallback_missions.append({
+                    "id": f"fallback_{idx}_{t_idx}",
+                    "title": t["title"],
+                    "body": t["body"],
+                    "body_preview": t["body"][:200],
+                    "html_url": f"https://github.com/{owner}/{repo_name}/issues/{1000 + t_idx}",
+                    "repo_full_name": f"{owner}/{repo_name}",
+                    "owner": owner,
+                    "repo": repo_name,
+                    "difficulty": t["difficulty"],
+                    "xp": t["xp"],
+                    "skills": t["skills"],
+                    "time_estimate": t["estimated_time"],
+                    "comments_count": 2 * t_idx + 1,
+                    "created_at": "2026-05-24T00:00:00Z",
+                    "company_name": company_name,
+                    "owner_avatar_url": f"https://github.com/{owner}.png?size=32",
+                    "issue_number": 1000 + t_idx,
+                    "labels": ["good first issue" if t["difficulty"] == "Beginner" else "enhancement"],
+                    "company": company_name,
+                    "repo_name": f"{owner}/{repo_name}",
+                    "estimated_time": t["estimated_time"],
+                    "comments": 2 * t_idx + 1,
+                    "number": 1000 + t_idx
+                })
+        else:
+            for t_idx, template in enumerate(issue_templates):
+                issue_id = f"fallback_{idx}_{t_idx}"
+                title = template["title_template"].format(feature=feature_name)
+                body = template["body_template"].format(feature=feature_name)
+                difficulty = template["difficulty"]
+                xp = template["xp"]
+                skills = template["skills"]
+                estimated_time = template["estimated_time"]
+                
+                fallback_missions.append({
+                    "id": issue_id,
+                    "title": title,
+                    "body": body,
+                    "body_preview": body[:200],
+                    "html_url": f"https://github.com/{owner}/{repo_name}/issues/{1000 + t_idx}",
+                    "repo_full_name": f"{owner}/{repo_name}",
+                    "owner": owner,
+                    "repo": repo_name,
+                    "difficulty": difficulty,
+                    "xp": xp,
+                    "skills": skills,
+                    "time_estimate": estimated_time,
+                    "comments_count": 2 * t_idx + 1,
+                    "created_at": "2026-05-24T00:00:00Z",
+                    "company_name": company_name,
+                    "owner_avatar_url": f"https://github.com/{owner}.png?size=32",
+                    "issue_number": 1000 + t_idx,
+                    "labels": ["good first issue" if difficulty == "Beginner" else "enhancement"],
+                    "company": company_name,
+                    "repo_name": f"{owner}/{repo_name}",
+                    "estimated_time": estimated_time,
+                    "comments": 2 * t_idx + 1,
+                    "number": 1000 + t_idx
+                })
+                
     return fallback_missions
 
 @router.get("/default")
@@ -273,12 +344,23 @@ async def get_default_missions():
             if len(unique_issues) >= 200:
                 break
                 
-    # Sort Vercel issues first, then order by difficulty (Beginner -> Intermediate -> Advanced)
-    order = {"Beginner": 0, "Intermediate": 1, "Advanced": 2}
-    unique_issues.sort(key=lambda x: (
-        0 if x["company_name"].lower() == "vercel" else 1,
-        order.get(x["difficulty"], 1)
-    ))
+    def get_sort_key(x):
+        is_vercel = x["company_name"].lower() == "vercel"
+        diff = x["difficulty"]
+        if is_vercel and diff == "Beginner":
+            return (0, 0)
+        elif not is_vercel and diff == "Beginner":
+            return (0, 1)
+        elif is_vercel and diff == "Intermediate":
+            return (1, 0)
+        elif not is_vercel and diff == "Intermediate":
+            return (1, 1)
+        elif is_vercel and diff == "Advanced":
+            return (2, 0)
+        else:
+            return (2, 1)
+            
+    unique_issues.sort(key=get_sort_key)
     
     result = unique_issues[:200]  # Exact 160 + 40 = 200 companies/missions!
     await set_cache("default_missions", result)
@@ -302,11 +384,22 @@ async def search_missions(company: str = "", q: str = ""):
             matched_default.append(m)
             
     if matched_default:
-        order = {"Beginner": 0, "Intermediate": 1, "Advanced": 2}
-        matched_default.sort(key=lambda x: (
-            0 if x["company_name"].lower() == "vercel" else 1,
-            order.get(x["difficulty"], 1)
-        ))
+        def get_sort_key(x):
+            is_vercel = x["company_name"].lower() == "vercel"
+            diff = x["difficulty"]
+            if is_vercel and diff == "Beginner":
+                return (0, 0)
+            elif not is_vercel and diff == "Beginner":
+                return (0, 1)
+            elif is_vercel and diff == "Intermediate":
+                return (1, 0)
+            elif not is_vercel and diff == "Intermediate":
+                return (1, 1)
+            elif is_vercel and diff == "Advanced":
+                return (2, 0)
+            else:
+                return (2, 1)
+        matched_default.sort(key=get_sort_key)
         return matched_default
         
     # 2. Fallback to a single, highly optimized GitHub Search API query if not found locally
