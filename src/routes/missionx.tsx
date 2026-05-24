@@ -103,7 +103,6 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
   const [searchQuery, setSearchQuery] = useState("")
   const [totalCount, setTotalCount] = useState(0)
   const [drawerIssue, setDrawerIssue] = useState<any | null>(null);
-  const [difficultyFilter, setDifficultyFilter] = useState<"All" | "Beginner" | "Intermediate" | "Advanced">("All")
 
   // On component mount, ALWAYS load default missions
   useEffect(() => {
@@ -148,13 +147,8 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Apply filter on top of search results
-  const filteredMissions = missions.filter(m => 
-    difficultyFilter === "All" ? true : m.difficulty === difficultyFilter
-  )
-
-  const visibleMissions = filteredMissions.slice(0, displayCount)
-  const hasMore = displayCount < filteredMissions.length
+  const visibleMissions = missions.slice(0, displayCount)
+  const hasMore = displayCount < missions.length
 
   const handleAcceptMission = (mission: any) => {
     if (!acceptedMissions.find(m => m.id === mission.id)) {
@@ -165,38 +159,22 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
   return (
     <div className="flex gap-8 h-full relative">
       <div className="w-[65%] flex flex-col gap-6">
-        <div className="flex gap-3 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search missions by company (e.g., amazon, google, netflix), title, or skills..."
-              className="w-full pl-10 pr-4 py-3 bg-white border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          
-          <select
-            value={difficultyFilter}
-            onChange={(e) => {
-              setDifficultyFilter(e.target.value as any)
-              setDisplayCount(16) // reset pagination when filter changes
-            }}
-            className="border rounded-xl px-3 py-2 text-sm bg-white min-w-[140px] shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-          >
-            <option value="All">All Levels</option>
-            <option value="Beginner">🟢 Beginner</option>
-            <option value="Intermediate">🟡 Intermediate</option>
-            <option value="Advanced">🔴 Advanced</option>
-          </select>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Search missions by company (e.g., amazon, google, netflix), title, or skills..."
+            className="w-full pl-10 pr-4 py-3 bg-white border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         
         {!isLoading && missions.length > 0 && (
           <p className="text-sm text-slate-500 mb-3">
-            {difficultyFilter !== "All" 
-              ? `Showing ${filteredMissions.length} ${difficultyFilter} missions`
-              : `Found ${missions.length} missions — showing ${Math.min(displayCount, filteredMissions.length)}`
+            {searchQuery.trim() !== "" 
+              ? `Found ${missions.length} missions for "${searchQuery}"`
+              : `Showing ${missions.length} open missions across top repositories — search to filter by company`
             }
           </p>
         )}
@@ -230,12 +208,12 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
               onClick={() => setDisplayCount(prev => prev + 16)}
               className="px-6 py-2 border rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
             >
-              Load More ({filteredMissions.length - displayCount} remaining)
+              Load More ({missions.length - displayCount} remaining)
             </button>
           </div>
         )}
 
-        {!isLoading && filteredMissions.length === 0 && searchQuery.trim() !== "" && (
+        {!isLoading && missions.length === 0 && searchQuery.trim() !== "" && (
           <div className="text-center py-16 text-slate-500 border border-dashed rounded-xl bg-white">
             <FlaskConical className="w-10 h-10 mx-auto mb-3 text-slate-300" />
             No missions found for "{searchQuery}". Try a different company name.
