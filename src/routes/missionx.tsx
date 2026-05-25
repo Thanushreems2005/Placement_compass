@@ -552,53 +552,53 @@ function ActiveMissionsTab({ acceptedMissions, onDecline, onComplete }: { accept
 function ActiveMissionTabItem({ mission, onDecline, onComplete }: { mission: any, onDecline: () => void, onComplete: (prUrl: string) => void }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [prLink, setPrLink] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [verifyStatus, setVerifyStatus] = useState<"idle" | "success" | "warning" | "error">("idle");
-  const [verifyMsg, setVerifyMsg] = useState("");
+  const [verifyState, setVerifyState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [verifyMessage, setVerifyMessage] = useState("");
+  const [verifyDetails, setVerifyDetails] = useState<any>(null);
+
+  const repoParts = (mission.repo_name || "").split("/");
+  const expectedOwner = mission.owner || repoParts[0] || "";
+  const expectedRepo = mission.repo || repoParts[1] || "";
 
   const handleVerify = async () => {
-    if (!prLink.trim()) return;
-    setIsVerifying(true);
-    setVerifyStatus("idle");
-    
+    if (!prLink.trim()) {
+      setVerifyState("error");
+      setVerifyMessage("Please paste your GitHub PR link first.");
+      return;
+    }
+
+    setVerifyState("loading");
+    setVerifyMessage("Checking your PR on GitHub...");
+    setVerifyDetails(null);
+
     try {
-      const res = await fetch("/api/v1/missions/verify", {
+      const res = await fetch("/api/v1/submissions/verify-pr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          pr_link: prLink, 
-          mission_id: mission.id, 
-          repo_name: mission.repo_name,
+        body: JSON.stringify({
+          pr_url: prLink.trim(),
+          owner: expectedOwner,
+          repo: expectedRepo,
           issue_number: mission.number,
-          issue_title: mission.title,
-          issue_description: mission.body || mission.body_preview || ""
         })
       });
+
       const data = await res.json();
-      
+      setVerifyDetails(data);
+
       if (data.verified) {
-        if (data.warning) {
-          setVerifyStatus("warning");
-          setVerifyMsg(data.warning);
-          setTimeout(() => {
-            onComplete(prLink);
-          }, 3000);
-        } else {
-          setVerifyStatus("success");
-          setVerifyMsg(data.message);
-          setTimeout(() => {
-            onComplete(prLink);
-          }, 2000);
-        }
+        setVerifyState("success");
+        setVerifyMessage(data.message || "PR verified!");
+        setTimeout(() => {
+          onComplete(prLink.trim());
+        }, 2000);
       } else {
-        setVerifyStatus("error");
-        setVerifyMsg(data.message || "Verification failed");
+        setVerifyState("error");
+        setVerifyMessage(data.message || "Verification failed.");
       }
-    } catch(e) {
-      setVerifyStatus("error");
-      setVerifyMsg("Network error occurred during verification.");
-    } finally {
-      setIsVerifying(false);
+    } catch (e) {
+      setVerifyState("error");
+      setVerifyMessage("Could not reach the server. Check your connection.");
     }
   };
 
@@ -623,39 +623,114 @@ function ActiveMissionTabItem({ mission, onDecline, onComplete }: { mission: any
         </div>
       </div>
       <div className="w-full md:w-[40%] flex flex-col gap-3 border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6 border-slate-100">
+        {/* Info box showing requirements upfront */}
+        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-700">
+          <p className="font-medium mb-1">For verification to pass your PR must:</p>
+          <ul className="space-y-0.5 list-none">
+            <li>✓ Be opened on <strong>{mission.repo_name || `${expectedOwner}/${expectedRepo}`}</strong></li>
+            <li>✓ Include "Fixes #{mission.number}" or "Closes #{mission.number}" in the title or description</li>
+            <li>✓ Be an open or merged pull request (not a draft)</li>
+          </ul>
+        </div>
+
         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Submit PR Link</label>
         <div className="flex gap-2">
           <input 
             type="text" 
-            placeholder="https://github.com/..." 
+            placeholder="https://github.com/owner/repo/pull/123" 
             value={prLink}
-            onChange={(e) => setPrLink(e.target.value)}
-            disabled={isVerifying || verifyStatus === 'success' || verifyStatus === 'warning'}
+            onChange={(e) => {
+              setPrLink(e.target.value);
+              setVerifyState("idle"); // reset on new input
+              setVerifyMessage("");
+            }}
+            disabled={verifyState === "loading" || verifyState === "success"}
             className="flex-1 px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
           <Button 
-            className="bg-emerald-600 hover:bg-emerald-700 shrink-0" 
+            className={`shrink-0 ${
+              verifyState === "success" 
+                ? "bg-green-500 hover:bg-green-600 text-white cursor-default"
+                : verifyState === "loading"
+                ? "bg-gray-400 text-white cursor-wait"
+                : "bg-emerald-600 hover:bg-emerald-700 text-white"
+            }`} 
             onClick={handleVerify}
-            disabled={!prLink.trim() || isVerifying || verifyStatus === 'success' || verifyStatus === 'warning'}
+            disabled={verifyState === "loading" || verifyState === "success"}
           >
-            {isVerifying ? "Verifying..." : (verifyStatus === 'success' || verifyStatus === 'warning') ? "Verified ✓" : "Verify"}
+            {verifyState === "loading" ? "Checking..." 
+             : verifyState === "success" ? "✓ Verified"
+             : "Verify"}
           </Button>
         </div>
         
-        {verifyStatus === 'success' && (
-          <div className="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
-            <CheckCircle2 className="w-3 h-3" /> {verifyMsg} Moving to portfolio...
+        {/* Verification steps shown while loading */}
+        {verifyState === "loading" && (
+          <div className="mt-2 space-y-1">
+            {[
+              "Parsing PR URL...",
+              "Checking repository match...",
+              "Fetching PR from GitHub...",
+              "Confirming issue reference...",
+            ].map((step, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="w-3.5 h-3.5 border border-gray-300 rounded-full animate-pulse shrink-0"/>
+                {step}
+              </div>
+            ))}
           </div>
         )}
-        {verifyStatus === 'warning' && (
-          <div className="text-xs text-amber-600 font-medium flex items-start gap-1.5 mt-1 bg-amber-50 p-2.5 rounded-lg border border-amber-200 shadow-sm">
-            <span className="text-amber-500 font-bold shrink-0">⚠️</span>
-            <span>{verifyMsg}</span>
+
+        {/* Success message */}
+        {verifyState === "success" && (
+          <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+            <div className="flex items-center gap-2 text-green-700 text-sm font-medium mb-1">
+              <span>✓</span>
+              <span>{verifyMessage}</span>
+            </div>
+            {verifyDetails && (
+              <div className="text-xs text-green-600 space-y-0.5">
+                <p>PR #{verifyDetails.pr_number}: {verifyDetails.pr_title}</p>
+                <p>Status: {verifyDetails.pr_merged ? "Merged ✓" : verifyDetails.pr_state}</p>
+                <a href={verifyDetails.pr_url} target="_blank" rel="noopener noreferrer" className="underline font-semibold block mt-1">
+                  View PR on GitHub →
+                </a>
+              </div>
+            )}
           </div>
         )}
-        {verifyStatus === 'error' && (
-          <div className="text-xs text-red-500 font-medium mt-1">
-            {verifyMsg}
+
+        {/* Error message with specific reason */}
+        {verifyState === "error" && (
+          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+            <div className="flex items-start gap-2">
+              <span className="text-red-500 text-sm">✗</span>
+              <div>
+                <p className="text-red-700 text-sm font-medium">Verification Failed</p>
+                <p className="text-red-600 text-xs mt-0.5">{verifyMessage}</p>
+                {verifyDetails?.step_failed === "issue_not_referenced" && (
+                  <div className="mt-2 p-2 bg-red-100 rounded text-xs text-red-700">
+                    <p className="font-medium">How to fix:</p>
+                    <p>In your PR description, add one of these lines:</p>
+                    <code className="block mt-1 font-mono">Fixes #{mission.number}</code>
+                    <code className="block font-mono">Closes #{mission.number}</code>
+                    <p className="mt-1">Then save the PR and click Verify again.</p>
+                  </div>
+                )}
+                {verifyDetails?.step_failed === "pr_not_found" && (
+                  <div className="mt-2 p-2 bg-red-100 rounded text-xs text-red-700">
+                    <p className="font-medium">How to fix:</p>
+                    <p>Make sure you have opened a Pull Request on GitHub, not just pushed commits. Go to the repository and click "New Pull Request".</p>
+                  </div>
+                )}
+                {verifyDetails?.step_failed === "repo_mismatch" && (
+                  <div className="mt-2 p-2 bg-red-100 rounded text-xs text-red-700">
+                    <p className="font-medium">How to fix:</p>
+                    <p>Your PR must be opened on <strong>{mission.repo_name || `${expectedOwner}/${expectedRepo}`}</strong>. Fork that repo, make your changes, and open the PR there.</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
         
