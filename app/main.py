@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from app.core.config import settings
-from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health, career, missions, aptitude_v2
+from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health, career, missions, aptitude_v2, submissions
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.hardening import RequestIDMiddleware, TimeoutMiddleware
 from app.core.exceptions import global_exception_handler, not_found_exception_handler, NotFoundException
@@ -107,6 +107,7 @@ app.include_router(notifications.router, prefix=settings.API_V1_STR)
 app.include_router(health.router, prefix=settings.API_V1_STR)
 app.include_router(career.router, prefix=settings.API_V1_STR)
 app.include_router(missions.router, prefix=settings.API_V1_STR)
+app.include_router(submissions.router, prefix=settings.API_V1_STR)
 app.include_router(aptitude_v2.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
