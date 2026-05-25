@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SkillMappingRouteImport } from './routes/skill-mapping'
 import { Route as ResumeOptimizerRouteImport } from './routes/resume-optimizer'
+import { Route as MissionxRouteImport } from './routes/missionx'
 import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as InnovxRouteImport } from './routes/innovx'
 import { Route as HiringProcessRouteImport } from './routes/hiring-process'
@@ -19,6 +20,7 @@ import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as CareerIntelligenceRouteImport } from './routes/career-intelligence'
 import { Route as CareerDashboardRouteImport } from './routes/career-dashboard'
+import { Route as AptitudeRouteImport } from './routes/aptitude'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CompanyCompanyIdRouteImport } from './routes/company.$companyId'
@@ -31,6 +33,11 @@ const SkillMappingRoute = SkillMappingRouteImport.update({
 const ResumeOptimizerRoute = ResumeOptimizerRouteImport.update({
   id: '/resume-optimizer',
   path: '/resume-optimizer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionxRoute = MissionxRouteImport.update({
+  id: '/missionx',
+  path: '/missionx',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntelligenceRoute = IntelligenceRouteImport.update({
@@ -73,6 +80,11 @@ const CareerDashboardRoute = CareerDashboardRouteImport.update({
   path: '/career-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AptitudeRoute = AptitudeRouteImport.update({
+  id: '/aptitude',
+  path: '/aptitude',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -92,6 +104,7 @@ const CompanyCompanyIdRoute = CompanyCompanyIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/aptitude': typeof AptitudeRoute
   '/career-dashboard': typeof CareerDashboardRoute
   '/career-intelligence': typeof CareerIntelligenceRoute
   '/categories': typeof CategoriesRoute
@@ -100,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/hiring-process': typeof HiringProcessRoute
   '/innovx': typeof InnovxRoute
   '/intelligence': typeof IntelligenceRoute
+  '/missionx': typeof MissionxRoute
   '/resume-optimizer': typeof ResumeOptimizerRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
@@ -107,6 +121,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/aptitude': typeof AptitudeRoute
   '/career-dashboard': typeof CareerDashboardRoute
   '/career-intelligence': typeof CareerIntelligenceRoute
   '/categories': typeof CategoriesRoute
@@ -115,6 +130,7 @@ export interface FileRoutesByTo {
   '/hiring-process': typeof HiringProcessRoute
   '/innovx': typeof InnovxRoute
   '/intelligence': typeof IntelligenceRoute
+  '/missionx': typeof MissionxRoute
   '/resume-optimizer': typeof ResumeOptimizerRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
@@ -123,6 +139,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/aptitude': typeof AptitudeRoute
   '/career-dashboard': typeof CareerDashboardRoute
   '/career-intelligence': typeof CareerIntelligenceRoute
   '/categories': typeof CategoriesRoute
@@ -131,6 +148,7 @@ export interface FileRoutesById {
   '/hiring-process': typeof HiringProcessRoute
   '/innovx': typeof InnovxRoute
   '/intelligence': typeof IntelligenceRoute
+  '/missionx': typeof MissionxRoute
   '/resume-optimizer': typeof ResumeOptimizerRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
@@ -140,6 +158,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/analytics'
+    | '/aptitude'
     | '/career-dashboard'
     | '/career-intelligence'
     | '/categories'
@@ -148,6 +167,7 @@ export interface FileRouteTypes {
     | '/hiring-process'
     | '/innovx'
     | '/intelligence'
+    | '/missionx'
     | '/resume-optimizer'
     | '/skill-mapping'
     | '/company/$companyId'
@@ -155,6 +175,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/analytics'
+    | '/aptitude'
     | '/career-dashboard'
     | '/career-intelligence'
     | '/categories'
@@ -163,6 +184,7 @@ export interface FileRouteTypes {
     | '/hiring-process'
     | '/innovx'
     | '/intelligence'
+    | '/missionx'
     | '/resume-optimizer'
     | '/skill-mapping'
     | '/company/$companyId'
@@ -170,6 +192,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/analytics'
+    | '/aptitude'
     | '/career-dashboard'
     | '/career-intelligence'
     | '/categories'
@@ -178,6 +201,7 @@ export interface FileRouteTypes {
     | '/hiring-process'
     | '/innovx'
     | '/intelligence'
+    | '/missionx'
     | '/resume-optimizer'
     | '/skill-mapping'
     | '/company/$companyId'
@@ -186,6 +210,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  AptitudeRoute: typeof AptitudeRoute
   CareerDashboardRoute: typeof CareerDashboardRoute
   CareerIntelligenceRoute: typeof CareerIntelligenceRoute
   CategoriesRoute: typeof CategoriesRoute
@@ -194,6 +219,7 @@ export interface RootRouteChildren {
   HiringProcessRoute: typeof HiringProcessRoute
   InnovxRoute: typeof InnovxRoute
   IntelligenceRoute: typeof IntelligenceRoute
+  MissionxRoute: typeof MissionxRoute
   ResumeOptimizerRoute: typeof ResumeOptimizerRoute
   SkillMappingRoute: typeof SkillMappingRoute
   CompanyCompanyIdRoute: typeof CompanyCompanyIdRoute
@@ -213,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/resume-optimizer'
       fullPath: '/resume-optimizer'
       preLoaderRoute: typeof ResumeOptimizerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/missionx': {
+      id: '/missionx'
+      path: '/missionx'
+      fullPath: '/missionx'
+      preLoaderRoute: typeof MissionxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/intelligence': {
@@ -271,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CareerDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aptitude': {
+      id: '/aptitude'
+      path: '/aptitude'
+      fullPath: '/aptitude'
+      preLoaderRoute: typeof AptitudeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analytics': {
       id: '/analytics'
       path: '/analytics'
@@ -298,6 +338,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
+  AptitudeRoute: AptitudeRoute,
   CareerDashboardRoute: CareerDashboardRoute,
   CareerIntelligenceRoute: CareerIntelligenceRoute,
   CategoriesRoute: CategoriesRoute,
@@ -306,6 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   HiringProcessRoute: HiringProcessRoute,
   InnovxRoute: InnovxRoute,
   IntelligenceRoute: IntelligenceRoute,
+  MissionxRoute: MissionxRoute,
   ResumeOptimizerRoute: ResumeOptimizerRoute,
   SkillMappingRoute: SkillMappingRoute,
   CompanyCompanyIdRoute: CompanyCompanyIdRoute,

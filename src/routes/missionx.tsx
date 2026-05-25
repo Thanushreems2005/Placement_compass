@@ -16,13 +16,50 @@ function getIssueUrl(mission: any): string {
   return mission.html_url || ""; // fallback
 }
 
+function getCurrentUserId(): string {
+  try {
+    const localData = localStorage.getItem("sb-key-auth-token") || localStorage.getItem("supabase.auth.token");
+    if (localData) {
+      const parsed = JSON.parse(localData);
+      const userId = parsed?.user?.id || parsed?.currentSession?.user?.id;
+      if (userId) return userId;
+    }
+  } catch (e) {
+    console.error("Error reading auth token", e);
+  }
+  return "d3b07384-d113-4ec6-a5ee-8d2347dffb0e";
+}
+
 export const Route = createFileRoute('/missionx')({
   component: MissionX
 });
 
 function MissionX() {
-  const [activeTab, setActiveTab] = useState<'board' | 'active'>('board');
+  const [activeTab, setActiveTab] = useState<'board' | 'active' | 'portfolio'>('board');
   const [acceptedMissions, setAcceptedMissions] = useState<any[]>([]);
+  const [portfolio, setPortfolio] = useState<any>(null);
+  const [portfolioLoading, setPortfolioLoading] = useState(false);
+
+  // Load portfolio when tab is switched to My Portfolio
+  useEffect(() => {
+    if (activeTab === "portfolio") {
+      loadPortfolio();
+    }
+  }, [activeTab]);
+
+  async function loadPortfolio() {
+    setPortfolioLoading(true);
+    try {
+      const userId = getCurrentUserId();
+      const res = await fetch(`/api/v1/portfolio/${userId}`);
+      const data = await res.json();
+      setPortfolio(data);
+    } catch (e) {
+      console.error("Portfolio load failed", e);
+    } finally {
+      setPortfolioLoading(false);
+    }
+  }
 
   // Count only non-completed for the "active" badge
   const activeMissions = acceptedMissions.filter(m => m.status !== "completed");
@@ -31,19 +68,55 @@ function MissionX() {
     setAcceptedMissions(prev => prev.filter(m => m.id !== missionId));
   };
 
-  const handleComplete = (mission: any, prUrl: string) => {
-    setAcceptedMissions(prev => prev.map(m => {
-      if (m.id === mission.id) {
-        return {
-          ...m,
-          status: "completed",
+  async function markMissionCompleted(
+    mission: any,
+    prUrl: string, 
+    verifyData: any
+  ) {
+    const missionId = mission.id;
+    // Update local state immediately
+    setAcceptedMissions(prev => prev.map(m => 
+      m.id === missionId 
+        ? { ...m, status: "completed", pr_url: prUrl, completed_at: new Date().toISOString() }
+        : m
+    ));
+
+    // Persist to backend → Supabase
+    try {
+      const repoParts = (mission.repo_name || "").split("/");
+      const owner = mission.owner || repoParts[0] || "";
+      const repo = mission.repo || repoParts[1] || "";
+      const issue_number = mission.issue_number || mission.number || 0;
+
+      await fetch("/api/v1/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: getCurrentUserId(),
+          mission_id: missionId,
+          mission_title: mission.title,
+          owner: owner,
+          repo: repo,
+          repo_full_name: mission.repo_name || `${owner}/${repo}`,
+          issue_number: issue_number,
           pr_url: prUrl,
-          completed_at: new Date().toISOString()
-        };
-      }
-      return m;
-    }));
-  };
+          pr_number: verifyData.pr_number,
+          pr_title: verifyData.pr_title,
+          difficulty: mission.difficulty,
+          xp: mission.xp,
+          company_name: mission.company_name || mission.company || "",
+          skills: mission.skills || [],
+          status: "completed",
+          completed_at: new Date().toISOString(),
+        })
+      });
+      // Reload portfolio data
+      loadPortfolio();
+    } catch (e) {
+      console.error("Failed to save submission:", e);
+    }
+  }
+
 
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50/50">
@@ -66,6 +139,12 @@ function MissionX() {
             icon={<ListChecks className="w-4 h-4" />}
             label={`Active Missions (${activeMissions.length})`} 
           />
+          <TabButton 
+            active={activeTab === 'portfolio'} 
+            onClick={() => setActiveTab('portfolio')} 
+            icon={<Trophy className="w-4 h-4" />}
+            label="My Portfolio" 
+          />
         </div>
       </div>
 
@@ -84,8 +163,295 @@ function MissionX() {
             <ActiveMissionsTab 
               acceptedMissions={acceptedMissions} 
               onDecline={handleDecline}
-              onComplete={handleComplete}
+              onComplete={markMissionCompleted}
             />
+          </div>
+        )}
+        {activeTab === 'portfolio' && (
+          <div className="p-6">
+            
+            {portfolioLoading && (
+              <div className="space-y-4">
+                {/* Skeleton stat cards */}
+                <div className="grid grid-cols-4 gap-4">
+                  {Array(4).fill(0).map((_, i) => (
+                    <div key={i} className="border rounded-lg p-4 animate-pulse">
+                      <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"/>
+                      <div className="h-3 bg-gray-200 rounded w-3/4"/>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!portfolioLoading && portfolio && (
+              <>
+                {/* ── STAT CARDS ── */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                  {[
+                    { 
+                      value: portfolio.stats.total_xp.toLocaleString(), 
+                      label: "Total XP", 
+                      sub: portfolio.stats.total_xp > 1000 ? "Top 15% in college" : "Keep going!",
+                      color: "border-t-amber-400",
+                      icon: "🏆"
+                    },
+                    { 
+                      value: portfolio.stats.total_missions, 
+                      label: "Missions Completed", 
+                      sub: "Real OSS contributions",
+                      color: "border-t-blue-400",
+                      icon: "🎯"
+                    },
+                    { 
+                      value: portfolio.stats.merged_prs, 
+                      label: "PRs Merged", 
+                      sub: "Accepted by maintainers",
+                      color: "border-t-green-400",
+                      icon: "✅"
+                    },
+                    { 
+                      value: portfolio.stats.badges_count, 
+                      label: "Company Badges", 
+                      sub: "Readiness proven",
+                      color: "border-t-purple-400",
+                      icon: "🏅"
+                    },
+                  ].map((stat, i) => (
+                    <div key={i} className={`border-t-4 ${stat.color} rounded-lg p-4 bg-white shadow-sm`}>
+                      <div className="text-3xl font-bold text-gray-900 mb-1">
+                        {stat.icon} {stat.value}
+                      </div>
+                      <div className="text-sm font-medium text-gray-700">{stat.label}</div>
+                      <div className="text-xs text-muted-foreground mt-1">{stat.sub}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* ── EMPTY STATE ── */}
+                {portfolio.contributions.length === 0 && (
+                  <div className="text-center py-16 border-2 border-dashed rounded-xl bg-white shadow-sm">
+                    <div className="text-5xl mb-4">🚀</div>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                      No contributions yet
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Accept a mission, fix a real GitHub issue, submit your PR, and it will appear here.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab("board")}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium shadow-sm hover:bg-blue-700 transition-colors"
+                    >
+                      Browse Missions →
+                    </button>
+                  </div>
+                )}
+
+                {portfolio.contributions.length > 0 && (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    {/* ── LEFT COLUMN: Contributions Timeline ── */}
+                    <div className="lg:col-span-2">
+                      <h2 className="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <span>🔗</span> Verified Contributions
+                        <span className="text-xs font-normal text-muted-foreground">
+                          ({portfolio.contributions.length} total)
+                        </span>
+                      </h2>
+
+                      <div className="relative">
+                        {/* Vertical timeline line */}
+                        <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gray-200"/>
+
+                        <div className="space-y-4">
+                          {portfolio.contributions.map((contrib: any) => (
+                            <div key={contrib.id} className="relative flex gap-4">
+                              
+                              {/* Timeline dot */}
+                              <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
+                                contrib.pr_merged 
+                                  ? "bg-green-50 border-green-400" 
+                                  : contrib.pr_status === "open"
+                                  ? "bg-blue-50 border-blue-400"
+                                  : "bg-gray-50 border-gray-300"
+                              }`}>
+                                <img 
+                                  src={contrib.owner_avatar_url} 
+                                  className="w-6 h-6 rounded-full bg-white object-contain"
+                                  alt={contrib.owner}
+                                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://github.com/github.png?size=40'; }}
+                                />
+                              </div>
+
+                              {/* Contribution card */}
+                              <div className="flex-1 border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
+                                
+                                {/* Header row */}
+                                <div className="flex items-start justify-between mb-2">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                                      <span className="text-xs font-medium text-muted-foreground">
+                                        {contrib.repo_full_name}
+                                      </span>
+                                      {/* PR Status pill */}
+                                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                        contrib.pr_merged 
+                                          ? "bg-purple-100 text-purple-700"
+                                          : contrib.pr_status === "open"
+                                          ? "bg-blue-100 text-blue-700"
+                                          : "bg-gray-100 text-gray-600"
+                                      }`}>
+                                        {contrib.pr_merged ? "✓ Merged" 
+                                         : contrib.pr_status === "open" ? "⏳ Open PR"
+                                         : contrib.pr_status}
+                                      </span>
+                                      {/* Difficulty pill */}
+                                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                        contrib.difficulty === "Beginner" ? "bg-green-100 text-green-700"
+                                        : contrib.difficulty === "Intermediate" ? "bg-amber-100 text-amber-700"
+                                        : "bg-red-100 text-red-700"
+                                      }`}>
+                                        {contrib.difficulty}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-900">
+                                      {contrib.mission_title}
+                                    </p>
+                                  </div>
+                                  {/* XP badge */}
+                                  <span className="text-sm font-bold text-amber-600 ml-3 flex-shrink-0">
+                                    +{contrib.xp} XP
+                                  </span>
+                                </div>
+
+                                {/* PR Link row — the real GitHub link with icon */}
+                                {contrib.pr_url && (
+                                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100">
+                                    <svg className="w-4 h-4 text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                                    </svg>
+                                    
+                                    <a
+                                      href={contrib.pr_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-mono truncate"
+                                    >
+                                      {contrib.pr_url.replace("https://github.com/", "")}
+                                    </a>
+                                    <span className="text-xs text-muted-foreground flex-shrink-0">
+                                      PR #{contrib.pr_number}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Score if available */}
+                                {contrib.score && (
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                                      <div 
+                                        className="bg-blue-500 h-1.5 rounded-full"
+                                        style={{ width: `${(contrib.score / 1000) * 100}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-xs text-muted-foreground">
+                                      Score: {contrib.score}/1000
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Date */}
+                                {contrib.completed_at && (
+                                  <p className="text-xs text-muted-foreground mt-2">
+                                    Completed {new Date(contrib.completed_at).toLocaleDateString("en-IN", {
+                                      day: "numeric", month: "short", year: "numeric"
+                                    })}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── RIGHT COLUMN: Skills + Badges ── */}
+                    <div className="space-y-6">
+
+                      {/* Company Badges */}
+                      {portfolio.badges.length > 0 && (
+                        <div className="border rounded-lg p-4 bg-white shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            🏅 Company Badges
+                          </h3>
+                          <div className="space-y-3">
+                            {portfolio.badges.map((badge: any) => (
+                              <div key={badge.company} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                                <img 
+                                  src={badge.avatar_url} 
+                                  className="w-8 h-8 rounded-full border bg-white object-contain"
+                                  alt={badge.company}
+                                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://github.com/github.png?size=32'; }}
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-800 truncate">
+                                    {badge.company}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {badge.missions_count} mission{badge.missions_count > 1 ? "s" : ""} · {badge.total_xp} XP
+                                  </p>
+                                </div>
+                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium flex-shrink-0">
+                                  Earned
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Verified Skills */}
+                      {portfolio.verified_skills.length > 0 && (
+                        <div className="border rounded-lg p-4 bg-white shadow-sm">
+                          <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            ✅ Verified Skills
+                            <span className="text-xs font-normal text-muted-foreground">from real contributions</span>
+                          </h3>
+                          <div className="flex flex-wrap gap-2">
+                            {portfolio.verified_skills.map((s: any) => (
+                              <span key={s.skill} className={`text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1 ${
+                                s.level === "Advanced" ? "bg-green-100 text-green-700"
+                                : s.level === "Intermediate" ? "bg-blue-100 text-blue-700"
+                                : "bg-gray-100 text-gray-600"
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                  s.level === "Advanced" ? "bg-green-500"
+                                  : s.level === "Intermediate" ? "bg-blue-500"
+                                  : "bg-gray-400"
+                                }`}/>
+                                {s.skill}
+                                <span className="opacity-60">({s.level})</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Download PDF button */}
+                      <button
+                        onClick={() => window.open(`/api/v1/portfolio/${getCurrentUserId()}/pdf`, '_blank')}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors cursor-pointer"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Download Portfolio PDF
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
       </div>
@@ -265,14 +631,14 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
              
              <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-6">
                 <div className="flex items-start gap-4">
-                  <img src={`https://github.com/${drawerIssue.repo_name?.split('/')[0] || drawerIssue.company}.png?size=48`} 
+                  <img src={`https://github.com/${(drawerIssue.repo_full_name || drawerIssue.repo_name)?.split('/')[0] || drawerIssue.company}.png?size=48`} 
                        alt={drawerIssue.company} 
                        className="w-12 h-12 rounded-lg border border-slate-200 bg-slate-50 object-contain p-1" 
                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://github.com/github.png?size=48'; }}
                   />
                   <div className="flex-1">
-                    <a href={`https://github.com/${drawerIssue.repo_name}`} target="_blank" rel="noreferrer" className="text-sm font-medium text-slate-500 hover:underline flex items-center gap-1">
-                      <Github className="w-4 h-4" /> {drawerIssue.repo_name}
+                    <a href={`https://github.com/${drawerIssue.repo_full_name || drawerIssue.repo_name}`} target="_blank" rel="noreferrer" className="text-sm font-medium text-slate-500 hover:underline flex items-center gap-1">
+                      <Github className="w-4 h-4" /> {drawerIssue.repo_full_name || drawerIssue.repo_name}
                     </a>
                     <h2 className="text-2xl font-bold text-slate-900 mt-1 leading-tight">{drawerIssue.title}</h2>
                     <div className="flex items-center gap-3 mt-3">
@@ -363,14 +729,19 @@ function MissionCardItem({ issue, onAccept, isAccepted, isCompleted, onViewDetai
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col h-[230px]">
       <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 bg-slate-100 pr-2 rounded-md border border-slate-200 overflow-hidden">
+        <div 
+          className="flex items-center gap-1.5 text-[9px] font-mono text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 max-w-[75%] break-all whitespace-normal"
+          title={issue.repo_full_name || issue.repo_name}
+        >
           <img 
-            src={`https://github.com/${issue.repo_name?.split('/')[0] || issue.company.toLowerCase()}.png?size=32`} 
-            className="w-6 h-6 object-contain bg-white" 
+            src={`https://github.com/${(issue.repo_full_name || issue.repo_name)?.split('/')[0] || issue.company.toLowerCase()}.png?size=32`} 
+            className="w-4 h-4 object-contain bg-white shrink-0 rounded" 
             alt={issue.company} 
             onError={(e) => { (e.target as HTMLImageElement).src = 'https://github.com/github.png?size=32'; }}
           />
-          {issue.repo_name}
+          <span className="leading-tight">
+            {issue.repo_full_name || issue.repo_name}
+          </span>
         </div>
         <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shrink-0 ${issue.difficulty === 'Beginner' ? 'bg-green-100 text-green-700' : issue.difficulty === 'Intermediate' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
           {issue.difficulty}
@@ -429,9 +800,12 @@ function ActiveMissionSidebarItem({ mission, onDecline }: { mission: any, onDecl
 
   return (
     <div className="border border-slate-100 bg-slate-50 rounded-lg p-4">
-      <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-2">
-        <Github className="w-3 h-3" />
-        {mission.repo_name}
+      <div 
+        className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-2 truncate max-w-full"
+        title={mission.repo_full_name || mission.repo_name}
+      >
+        <Github className="w-3 h-3 shrink-0" />
+        <span className="font-mono text-[10px] truncate">{mission.repo_full_name || mission.repo_name}</span>
       </div>
       <h4 className="font-semibold text-sm mb-3 line-clamp-2">{mission.title}</h4>
       
@@ -465,12 +839,14 @@ const CompletedMissionCard = ({ mission }: { mission: any }) => (
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
           <img 
-            src={`https://github.com/${mission.repo_name?.split('/')[0] || mission.company.toLowerCase()}.png?size=32`} 
+            src={`https://github.com/${(mission.repo_full_name || mission.repo_name)?.split('/')[0] || mission.company.toLowerCase()}.png?size=32`} 
             className="w-5 h-5 rounded-full"
             alt={mission.company}
             onError={(e) => { (e.target as HTMLImageElement).src = 'https://github.com/github.png?size=32'; }}
           />
-          <span className="text-xs text-muted-foreground">{mission.repo_name}</span>
+          <span className="text-xs text-muted-foreground font-mono" title={mission.repo_full_name || mission.repo_name}>
+            {mission.repo_full_name || mission.repo_name}
+          </span>
           <span className="text-xs text-muted-foreground">#{mission.number}</span>
         </div>
         <p className="font-medium text-sm mb-2">{mission.title}</p>
@@ -507,7 +883,7 @@ const CompletedMissionCard = ({ mission }: { mission: any }) => (
   </div>
 )
 
-function ActiveMissionsTab({ acceptedMissions, onDecline, onComplete }: { acceptedMissions: any[], onDecline: (id: string) => void, onComplete: (mission: any, prUrl: string) => void }) {
+function ActiveMissionsTab({ acceptedMissions, onDecline, onComplete }: { acceptedMissions: any[], onDecline: (id: string) => void, onComplete: (mission: any, prUrl: string, verifyData: any) => void }) {
   const activeMissions = acceptedMissions.filter(m => m.status !== "completed")
   const completedMissions = acceptedMissions.filter(m => m.status === "completed")
 
@@ -539,7 +915,7 @@ function ActiveMissionsTab({ acceptedMissions, onDecline, onComplete }: { accept
                   key={mission.id} 
                   mission={mission} 
                   onDecline={() => onDecline(mission.id)} 
-                  onComplete={(prUrl) => onComplete(mission, prUrl)} 
+                  onComplete={(prUrl, verifyData) => onComplete(mission, prUrl, verifyData)} 
                 />
               ))}
             </>
@@ -562,7 +938,7 @@ function ActiveMissionsTab({ acceptedMissions, onDecline, onComplete }: { accept
   );
 }
 
-function ActiveMissionTabItem({ mission, onDecline, onComplete }: { mission: any, onDecline: () => void, onComplete: (prUrl: string) => void }) {
+function ActiveMissionTabItem({ mission, onDecline, onComplete }: { mission: any, onDecline: () => void, onComplete: (prUrl: string, verifyData: any) => void }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [prLink, setPrLink] = useState("");
   const [verifyState, setVerifyState] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -603,7 +979,7 @@ function ActiveMissionTabItem({ mission, onDecline, onComplete }: { mission: any
         setVerifyState("success");
         setVerifyMessage(data.message || "PR verified!");
         setTimeout(() => {
-          onComplete(prLink.trim());
+          onComplete(prLink.trim(), data);
         }, 2000);
       } else {
         setVerifyState("error");
@@ -618,10 +994,13 @@ function ActiveMissionTabItem({ mission, onDecline, onComplete }: { mission: any
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center">
       <div className="flex-1">
-        <div className="flex items-center gap-2 text-sm font-medium text-slate-500 mb-2">
-          <Github className="w-4 h-4" />
-          {mission.repo_name}
-          <ChevronRight className="w-4 h-4" />
+        <div 
+          className="flex items-center gap-2 text-sm font-medium text-slate-500 mb-2 truncate max-w-full"
+          title={mission.repo_full_name || mission.repo_name}
+        >
+          <Github className="w-4 h-4 shrink-0" />
+          <span className="font-mono text-xs truncate">{mission.repo_full_name || mission.repo_name}</span>
+          <ChevronRight className="w-4 h-4 shrink-0" />
           <span className="text-slate-400">#{mission.number}</span>
         </div>
         <h3 className="text-lg font-bold mb-2 cursor-pointer hover:text-primary transition-colors" onClick={() => window.open(getIssueUrl(mission), '_blank')}>
@@ -640,7 +1019,7 @@ function ActiveMissionTabItem({ mission, onDecline, onComplete }: { mission: any
         <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-700">
           <p className="font-medium mb-1">For verification to pass your PR must:</p>
           <ul className="space-y-0.5 list-none">
-            <li>✓ Be opened on <strong>{mission.repo_name || `${expectedOwner}/${expectedRepo}`}</strong></li>
+            <li>✓ Be opened on <strong>{mission.repo_full_name || mission.repo_name || `${expectedOwner}/${expectedRepo}`}</strong></li>
             <li>✓ Include "Fixes #{mission.number}" or "Closes #{mission.number}" in the title or description</li>
             <li>✓ Be an open or merged pull request (not a draft)</li>
           </ul>

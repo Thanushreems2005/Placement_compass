@@ -64,18 +64,30 @@ def assign_difficulty(issue: dict, label_hint: str = None) -> tuple:
         return "Advanced", 500
 
 def build_issue_dict(issue, org, repo_name, company_name, label_hint=None):
+    # repo_name must be the full name — never slice or truncate it
+    # org must be the full org name — never slice or truncate it
     difficulty, xp = assign_difficulty(issue, label_hint)
     issue_number = issue["number"]
+    
+    # Build URLs from full untruncated parts
     issue_url = f"https://github.com/{org}/{repo_name}/issues/{issue_number}"
+    avatar_url = f"https://github.com/{org}.png?size=32"
+    
+    # Safety check — log if anything looks truncated
+    if len(repo_name) < 3:
+        print(f"[MissionX WARNING] Suspiciously short repo name: '{repo_name}' for org '{org}'")
+    if len(org) < 2:
+        print(f"[MissionX WARNING] Suspiciously short org name: '{org}'")
+        
     return {
         "id": str(issue["id"]),
         "title": issue["title"],
         "body": issue.get("body") or "",
         "body_preview": (issue.get("body") or "")[:200],
         "html_url": issue_url,
-        "repo_full_name": f"{org}/{repo_name}",
-        "owner": org,
-        "repo": repo_name,
+        "repo_full_name": f"{org}/{repo_name}",  # FULL name, never truncated
+        "owner": org,                              # FULL org name
+        "repo": repo_name,                         # FULL repo name
         "difficulty": difficulty,
         "xp": xp,
         "skills": extract_skills((issue.get("body") or "") + " " + issue["title"]),
@@ -83,7 +95,7 @@ def build_issue_dict(issue, org, repo_name, company_name, label_hint=None):
         "comments_count": issue.get("comments", 0),
         "created_at": issue["created_at"],
         "company_name": company_name,
-        "owner_avatar_url": f"https://github.com/{org}.png?size=32",
+        "owner_avatar_url": avatar_url,
         "issue_number": issue_number,
         "labels": [l["name"] for l in issue.get("labels", [])],
         # Fallbacks for frontend compatibility
@@ -147,6 +159,20 @@ GUARANTEED_REPOS = [
 ]
 
 def generate_fallback_seed_missions() -> list:
+    import json
+    import os
+    
+    file_path = os.path.join(os.path.dirname(__file__), "real_seed_missions.json")
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data:
+                    print(f"[MissionX] Successfully loaded {len(data)} real, active open issues from real_seed_missions.json!")
+                    return data
+        except Exception as e:
+            print(f"[MissionX ERROR] Failed to load real_seed_missions.json: {e}")
+
     fallback_missions = []
     issue_templates = [
         {
@@ -203,7 +229,8 @@ def generate_fallback_seed_missions() -> list:
                     "difficulty": "Beginner",
                     "xp": 100,
                     "body": "Help new contributors by documenting the newly introduced setup steps for Next.Js in the API guidelines, complete with simple code snippets.",
-                    "estimated_time": "2-4 hours"
+                    "estimated_time": "2-4 hours",
+                    "issue_number": 94077
                 },
                 {
                     "title": "Fix broken markdown links in Next.Js starter template instructions",
@@ -211,7 +238,8 @@ def generate_fallback_seed_missions() -> list:
                     "difficulty": "Beginner",
                     "xp": 100,
                     "body": "Several markdown link paths inside the default starter template's README are pointing to legacy routes. Help clean them up!",
-                    "estimated_time": "1-2 hours"
+                    "estimated_time": "1-2 hours",
+                    "issue_number": 94075
                 },
                 {
                     "title": "Update CSS module class name selector guidelines in Next.Js styling guides",
@@ -219,7 +247,8 @@ def generate_fallback_seed_missions() -> list:
                     "difficulty": "Beginner",
                     "xp": 100,
                     "body": "The styling docs currently have slightly outdated references regarding how nested CSS modules are compiled. Let's align them with Next.js 14 styles.",
-                    "estimated_time": "2-3 hours"
+                    "estimated_time": "2-3 hours",
+                    "issue_number": 93757
                 },
                 {
                     "title": "Refactor component lifecycle hooks and optimize state updates for Next.Js",
@@ -227,7 +256,8 @@ def generate_fallback_seed_missions() -> list:
                     "difficulty": "Intermediate",
                     "xp": 250,
                     "body": "The state synchronization logic in Next.Js is currently re-triggering unnecessary sub-tree re-renders on every scroll transition. Refactoring lifecycle triggers will resolve this issue.",
-                    "estimated_time": "4-8 hours"
+                    "estimated_time": "4-8 hours",
+                    "issue_number": 93993
                 },
                 {
                     "title": "Fix hydration mismatch error when using Next.Js in concurrent mode",
@@ -235,16 +265,18 @@ def generate_fallback_seed_missions() -> list:
                     "difficulty": "Advanced",
                     "xp": 500,
                     "body": "A hydration mismatch occurs when pre-rendering Next.Js server-side. The client-side virtual DOM does not align with the generated HTML structure, leading to runtime console warnings and degraded performance.",
-                    "estimated_time": "8+ hours"
+                    "estimated_time": "8+ hours",
+                    "issue_number": 20924
                 }
             ]
             for t_idx, t in enumerate(current_templates):
+                t_issue_num = t["issue_number"]
                 fallback_missions.append({
                     "id": f"fallback_{idx}_{t_idx}",
                     "title": t["title"],
                     "body": t["body"],
                     "body_preview": t["body"][:200],
-                    "html_url": f"https://github.com/{owner}/{repo_name}/issues/{1000 + t_idx}",
+                    "html_url": f"https://github.com/{owner}/{repo_name}/issues/{t_issue_num}",
                     "repo_full_name": f"{owner}/{repo_name}",
                     "owner": owner,
                     "repo": repo_name,
@@ -256,13 +288,13 @@ def generate_fallback_seed_missions() -> list:
                     "created_at": "2026-05-24T00:00:00Z",
                     "company_name": company_name,
                     "owner_avatar_url": f"https://github.com/{owner}.png?size=32",
-                    "issue_number": 1000 + t_idx,
+                    "issue_number": t_issue_num,
                     "labels": ["good first issue" if t["difficulty"] == "Beginner" else "enhancement"],
                     "company": company_name,
                     "repo_name": f"{owner}/{repo_name}",
                     "estimated_time": t["estimated_time"],
                     "comments": 2 * t_idx + 1,
-                    "number": 1000 + t_idx
+                    "number": t_issue_num
                 })
         else:
             for t_idx, template in enumerate(issue_templates):
@@ -274,12 +306,16 @@ def generate_fallback_seed_missions() -> list:
                 skills = template["skills"]
                 estimated_time = template["estimated_time"]
                 
+                # Use a high unique issue number range (e.g. 85000 + idx * 10 + t_idx)
+                # to prevent overlaps or redirects to pull requests in non-Vercel repos.
+                t_issue_num = 85000 + idx * 10 + t_idx
+                
                 fallback_missions.append({
                     "id": issue_id,
                     "title": title,
                     "body": body,
                     "body_preview": body[:200],
-                    "html_url": f"https://github.com/{owner}/{repo_name}/issues/{1000 + t_idx}",
+                    "html_url": f"https://github.com/{owner}/{repo_name}/issues/{t_issue_num}",
                     "repo_full_name": f"{owner}/{repo_name}",
                     "owner": owner,
                     "repo": repo_name,
@@ -291,16 +327,34 @@ def generate_fallback_seed_missions() -> list:
                     "created_at": "2026-05-24T00:00:00Z",
                     "company_name": company_name,
                     "owner_avatar_url": f"https://github.com/{owner}.png?size=32",
-                    "issue_number": 1000 + t_idx,
+                    "issue_number": t_issue_num,
                     "labels": ["good first issue" if difficulty == "Beginner" else "enhancement"],
                     "company": company_name,
                     "repo_name": f"{owner}/{repo_name}",
                     "estimated_time": estimated_time,
                     "comments": 2 * t_idx + 1,
-                    "number": 1000 + t_idx
+                    "number": t_issue_num
                 })
                 
     return fallback_missions
+
+@router.get("/debug/check-repos")
+async def check_repos():
+    cached = await get_cached("default_missions")
+    if not cached:
+        return {"message": "No cache yet — load the mission board first"}
+    
+    issues = []
+    for m in cached[:10]:
+        issues.append({
+            "title": m.get("title", "")[:40],
+            "owner": m.get("owner"),
+            "repo": m.get("repo"),
+            "repo_full_name": m.get("repo_full_name"),
+            "html_url": m.get("html_url"),
+            "issue_number": m.get("issue_number"),
+        })
+    return {"sample": issues}
 
 @router.get("/default")
 async def get_default_missions():

@@ -4,18 +4,31 @@ import re
 import requests
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from app.services.pr_validation_service import pr_validation_service
 from LANGGRAPH.nodes.pr_evaluation import evaluate_pr_node
+from LANGGRAPH.services.supabase_service import SupabaseClient
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/submissions", tags=["submissions"])
 
+@router.post("")
+async def create_submission(payload: dict):
+    try:
+        supabase = SupabaseClient().client
+        # Insert the submission into Supabase
+        res = supabase.table("submissions").insert(payload).execute()
+        return {"status": "success", "data": res.data}
+    except Exception as e:
+        logger.error(f"Error persisting submission to Supabase: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save submission: {str(e)}")
+
 class PREvaluationRequest(BaseModel):
     pr_url: str
     mission_id: str
+
 
 @router.post("/evaluate")
 async def evaluate_submission(request: PREvaluationRequest) -> Dict[str, Any]:

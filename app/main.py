@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from app.core.config import settings
-from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health, career, missions, aptitude_v2, submissions
+from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health, career, missions, aptitude_v2, submissions, portfolio
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.hardening import RequestIDMiddleware, TimeoutMiddleware
 from app.core.exceptions import global_exception_handler, not_found_exception_handler, NotFoundException
@@ -51,6 +51,9 @@ async def lifespan(app: FastAPI):
     is_redis_alive = await redis_service.ping()
     if is_redis_alive:
         logger.info("Redis Connectivity diagnostic check: PASSED (Operational)")
+        # Force a cache clear on restart so no truncated data is served
+        await redis_service.delete("default_missions")
+        logger.info("[MissionX] Invalidated default_missions cache to prevent serving truncated data.")
     else:
         logger.warning("Redis Connectivity diagnostic check: WARNING (Offline - using local JSON fallback)")
         
@@ -108,6 +111,7 @@ app.include_router(health.router, prefix=settings.API_V1_STR)
 app.include_router(career.router, prefix=settings.API_V1_STR)
 app.include_router(missions.router, prefix=settings.API_V1_STR)
 app.include_router(submissions.router, prefix=settings.API_V1_STR)
+app.include_router(portfolio.router, prefix=settings.API_V1_STR)
 app.include_router(aptitude_v2.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
