@@ -3,6 +3,19 @@ import { useState, useEffect, useRef } from 'react';
 import { FlaskConical, ListChecks, Activity, Search, Github, Clock, Trophy, ChevronRight, CheckCircle2, Download, Trash2, ShieldCheck, X, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+function getIssueUrl(mission: any): string {
+  if (!mission) return "";
+  const issueNum = mission.issue_number || mission.number;
+  const repoParts = (mission.repo_name || "").split("/");
+  const owner = mission.owner || repoParts[0] || "";
+  const repo = mission.repo || repoParts[1] || "";
+  
+  if (owner && repo && issueNum) {
+    return `https://github.com/${owner}/${repo}/issues/${issueNum}`;
+  }
+  return mission.html_url || ""; // fallback
+}
+
 export const Route = createFileRoute('/missionx')({
   component: MissionX
 });
@@ -305,7 +318,7 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
              </div>
              
              <div className="p-6 border-t bg-slate-50 flex gap-4">
-                <Button variant="outline" className="flex-1" onClick={() => window.open(drawerIssue.html_url, '_blank')}>
+                <Button variant="outline" className="flex-1" onClick={() => window.open(getIssueUrl(drawerIssue), '_blank')}>
                   View on GitHub &rarr;
                 </Button>
                 {acceptedMissions.some(m => m.id === drawerIssue.id) ? (
@@ -611,7 +624,7 @@ function ActiveMissionTabItem({ mission, onDecline, onComplete }: { mission: any
           <ChevronRight className="w-4 h-4" />
           <span className="text-slate-400">#{mission.number}</span>
         </div>
-        <h3 className="text-lg font-bold mb-2 cursor-pointer hover:text-primary transition-colors" onClick={() => window.open(mission.html_url, '_blank')}>
+        <h3 className="text-lg font-bold mb-2 cursor-pointer hover:text-primary transition-colors" onClick={() => window.open(getIssueUrl(mission), '_blank')}>
           {mission.title}
         </h3>
         <div className="flex gap-4 text-sm mb-4">

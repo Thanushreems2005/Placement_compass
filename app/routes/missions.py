@@ -65,12 +65,14 @@ def assign_difficulty(issue: dict, label_hint: str = None) -> tuple:
 
 def build_issue_dict(issue, org, repo_name, company_name, label_hint=None):
     difficulty, xp = assign_difficulty(issue, label_hint)
+    issue_number = issue["number"]
+    issue_url = f"https://github.com/{org}/{repo_name}/issues/{issue_number}"
     return {
         "id": str(issue["id"]),
         "title": issue["title"],
         "body": issue.get("body") or "",
         "body_preview": (issue.get("body") or "")[:200],
-        "html_url": issue["html_url"],
+        "html_url": issue_url,
         "repo_full_name": f"{org}/{repo_name}",
         "owner": org,
         "repo": repo_name,
@@ -82,14 +84,14 @@ def build_issue_dict(issue, org, repo_name, company_name, label_hint=None):
         "created_at": issue["created_at"],
         "company_name": company_name,
         "owner_avatar_url": f"https://github.com/{org}.png?size=32",
-        "issue_number": issue["number"],
+        "issue_number": issue_number,
         "labels": [l["name"] for l in issue.get("labels", [])],
         # Fallbacks for frontend compatibility
         "company": company_name,
         "repo_name": f"{org}/{repo_name}",
         "estimated_time": "2-4 hours" if difficulty == "Beginner" else "4-8 hours" if difficulty == "Intermediate" else "8+ hours",
         "comments": issue.get("comments", 0),
-        "number": issue["number"]
+        "number": issue_number
     }
 
 GUARANTEED_REPOS = [
