@@ -8,12 +8,11 @@ export const Route = createFileRoute('/missionx')({
 });
 
 function MissionX() {
-  const [activeTab, setActiveTab] = useState<'board' | 'active' | 'completed'>('board');
+  const [activeTab, setActiveTab] = useState<'board' | 'active'>('board');
   const [acceptedMissions, setAcceptedMissions] = useState<any[]>([]);
 
   // Count only non-completed for the "active" badge
   const activeMissions = acceptedMissions.filter(m => m.status !== "completed");
-  const completedMissions = acceptedMissions.filter(m => m.status === "completed");
 
   const handleDecline = (missionId: string) => {
     setAcceptedMissions(prev => prev.filter(m => m.id !== missionId));
@@ -52,27 +51,7 @@ function MissionX() {
             active={activeTab === 'active'} 
             onClick={() => setActiveTab('active')} 
             icon={<ListChecks className="w-4 h-4" />}
-            label="Active Missions"
-            badge={
-              activeMissions.length > 0 && (
-                <span className="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-primary rounded-full animate-pulse shadow-sm">
-                  {activeMissions.length}
-                </span>
-              )
-            }
-          />
-          <TabButton 
-            active={activeTab === 'completed'} 
-            onClick={() => setActiveTab('completed')} 
-            icon={<CheckCircle2 className="w-4 h-4" />}
-            label="Completed Missions"
-            badge={
-              completedMissions.length > 0 && (
-                <span className="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-emerald-500 rounded-full shadow-sm">
-                  {completedMissions.length}
-                </span>
-              )
-            }
+            label={`Active Missions (${activeMissions.length})`} 
           />
         </div>
       </div>
@@ -96,19 +75,12 @@ function MissionX() {
             />
           </div>
         )}
-        {activeTab === 'completed' && (
-          <div className="p-8 h-full">
-            <CompletedMissionsTab 
-              acceptedMissions={acceptedMissions}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-function TabButton({ active, onClick, icon, label, badge }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; badge?: React.ReactNode }) {
+function TabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
     <button
       onClick={onClick}
@@ -120,7 +92,6 @@ function TabButton({ active, onClick, icon, label, badge }: { active: boolean; o
     >
       {icon}
       {label}
-      {badge}
     </button>
   );
 }
@@ -132,7 +103,6 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
   const [searchQuery, setSearchQuery] = useState("")
   const [totalCount, setTotalCount] = useState(0)
   const [drawerIssue, setDrawerIssue] = useState<any | null>(null);
-  const [difficultyFilter, setDifficultyFilter] = useState<"All" | "Beginner" | "Intermediate" | "Advanced">("All")
 
   // On component mount, ALWAYS load default missions
   useEffect(() => {
@@ -177,13 +147,8 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Filter missions based on difficulty selection
-  const filteredMissions = missions.filter(m => 
-    difficultyFilter === "All" ? true : m.difficulty === difficultyFilter
-  )
-
-  const visibleMissions = filteredMissions.slice(0, displayCount)
-  const hasMore = displayCount < filteredMissions.length
+  const visibleMissions = missions.slice(0, displayCount)
+  const hasMore = displayCount < missions.length
 
   const handleAcceptMission = (mission: any) => {
     if (!acceptedMissions.find(m => m.id === mission.id)) {
@@ -191,62 +156,27 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
     }
   };
 
-  const activeMissionsInProgress = acceptedMissions.filter(m => m.status !== "completed");
-
   return (
     <div className="flex gap-8 h-full relative">
       <div className="w-[75%] flex flex-col gap-6">
-        <div className="flex gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search missions by company (e.g., amazon, google, netflix), title, or skills..."
-              className="w-full pl-10 pr-4 py-3 bg-white border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          
-          <div className="relative min-w-[165px]">
-            <select
-              value={difficultyFilter}
-              onChange={(e) => {
-                setDifficultyFilter(e.target.value as any)
-                setDisplayCount(16) // reset pagination when filter changes
-              }}
-              className="w-full border rounded-xl px-4 py-3 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer appearance-none font-medium pr-10 text-slate-700"
-            >
-              <option value="All">All Levels</option>
-              <option value="Beginner">🟢 Beginner</option>
-              <option value="Intermediate">🟡 Intermediate</option>
-              <option value="Advanced">🔴 Hard</option>
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Search missions by company (e.g., amazon, google, netflix), title, or skills..."
+            className="w-full pl-10 pr-4 py-3 bg-white border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         
         {!isLoading && missions.length > 0 && (
-          <div className="flex justify-between items-center mb-3">
-            <p className="text-sm text-slate-500">
-              {difficultyFilter !== "All" 
-                ? `Found ${filteredMissions.length} ${difficultyFilter} missions — showing ${Math.min(displayCount, filteredMissions.length)}`
-                : searchQuery.trim() !== "" 
-                  ? `Found ${missions.length} missions for "${searchQuery}"`
-                  : `Showing ${missions.length} open missions across top repositories — search to filter by company`
-              }
-            </p>
-            {activeMissionsInProgress.length > 0 && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-xs font-semibold text-primary">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                <span>{activeMissionsInProgress.length} Active Missions in Progress</span>
-              </div>
-            )}
-          </div>
+          <p className="text-sm text-slate-500 mb-3">
+            {searchQuery.trim() !== "" 
+              ? `Found ${missions.length} missions for "${searchQuery}"`
+              : `Showing ${missions.length} open missions across top repositories — search to filter by company`
+            }
+          </p>
         )}
 
         {isLoading && (
@@ -275,18 +205,18 @@ function MissionBoardTab({ acceptedMissions, setAcceptedMissions, onDecline }: {
         {!isLoading && hasMore && (
           <div className="flex justify-center mt-6 mb-8">
             <button 
-              onClick={() => setDisplayCount(prev => prev + 16)}
+              onClick={() => setDisplayCount(prev => prev + 15)}
               className="px-6 py-2 border rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
             >
-              Load More ({filteredMissions.length - displayCount} remaining)
+              Load More ({missions.length - displayCount} remaining)
             </button>
           </div>
         )}
 
-        {!isLoading && filteredMissions.length === 0 && (
+        {!isLoading && missions.length === 0 && searchQuery.trim() !== "" && (
           <div className="text-center py-16 text-slate-500 border border-dashed rounded-xl bg-white">
             <FlaskConical className="w-10 h-10 mx-auto mb-3 text-slate-300" />
-            No {difficultyFilter !== "All" ? difficultyFilter : ""} missions found. Try a different query.
+            No missions found for "{searchQuery}". Try a different company name.
           </div>
         )}
       </div>
@@ -566,6 +496,7 @@ const CompletedMissionCard = ({ mission }: { mission: any }) => (
 
 function ActiveMissionsTab({ acceptedMissions, onDecline, onComplete }: { acceptedMissions: any[], onDecline: (id: string) => void, onComplete: (mission: any, prUrl: string) => void }) {
   const activeMissions = acceptedMissions.filter(m => m.status !== "completed")
+  const completedMissions = acceptedMissions.filter(m => m.status === "completed")
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pt-4 pb-8">
@@ -576,7 +507,7 @@ function ActiveMissionsTab({ acceptedMissions, onDecline, onComplete }: { accept
         </div>
       </div>
 
-      {activeMissions.length === 0 ? (
+      {acceptedMissions.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
           <ListChecks className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <h3 className="text-xl font-medium text-slate-700">No active missions</h3>
@@ -584,43 +515,34 @@ function ActiveMissionsTab({ acceptedMissions, onDecline, onComplete }: { accept
         </div>
       ) : (
         <div className="grid gap-6">
-          {activeMissions.map((mission) => (
-            <ActiveMissionTabItem 
-              key={mission.id} 
-              mission={mission} 
-              onDecline={() => onDecline(mission.id)} 
-              onComplete={(prUrl) => onComplete(mission, prUrl)} 
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+          {/* Section 1: In Progress */}
+          {activeMissions.length > 0 && (
+            <>
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                In Progress ({activeMissions.length})
+              </h3>
+              {activeMissions.map((mission) => (
+                <ActiveMissionTabItem 
+                  key={mission.id} 
+                  mission={mission} 
+                  onDecline={() => onDecline(mission.id)} 
+                  onComplete={(prUrl) => onComplete(mission, prUrl)} 
+                />
+              ))}
+            </>
+          )}
 
-function CompletedMissionsTab({ acceptedMissions }: { acceptedMissions: any[] }) {
-  const completedMissions = acceptedMissions.filter(m => m.status === "completed")
-
-  return (
-    <div className="max-w-4xl mx-auto space-y-6 pt-4 pb-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold">Completed Missions</h2>
-          <p className="text-slate-500 mt-1">Review your successful open source contributions.</p>
-        </div>
-      </div>
-
-      {completedMissions.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
-          <CheckCircle2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-xl font-medium text-slate-700">No completed missions yet</h3>
-          <p className="text-slate-500 mt-2">Submit your PR and verify your active missions to see them here!</p>
-        </div>
-      ) : (
-        <div className="grid gap-6">
-          {completedMissions.map((mission) => (
-            <CompletedMissionCard key={mission.id} mission={mission} />
-          ))}
+          {/* Section 2: Completed */}
+          {completedMissions.length > 0 && (
+            <>
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 mt-6">
+                Completed ({completedMissions.length})
+              </h3>
+              {completedMissions.map((mission) => (
+                <CompletedMissionCard key={mission.id} mission={mission} />
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
