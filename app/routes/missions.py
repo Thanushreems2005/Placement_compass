@@ -486,6 +486,13 @@ async def verify_github_link(pr_link: str, target_repo: str, issue_number: int) 
         try:
             resp = await client.get(f"https://api.github.com/repos/{owner}/{repo_name}", headers=headers, timeout=15)
             if resp.status_code != 200:
+                is_rate_limited = resp.status_code in [403, 429] and (
+                    "rate limit" in resp.text.lower() or 
+                    resp.headers.get("x-ratelimit-remaining") == "0"
+                )
+                if is_rate_limited:
+                    logger.warning("GitHub API rate limit hit during repo check. Accepting optimistically.")
+                    return True, True, "Could not verify with GitHub API due to rate limits — accepted based on URL format", ""
                 return False, False, f"GitHub repository '{full_name}' not found.", ""
             
             repo_data = resp.json()
@@ -510,6 +517,8 @@ async def verify_github_link(pr_link: str, target_repo: str, issue_number: int) 
             # Case 1: Pull Request
             if url_type == "pull" and identifier.isdigit():
                 pr_resp = await client.get(f"https://api.github.com/repos/{owner}/{repo_name}/pulls/{identifier}", headers=headers, timeout=15)
+                if pr_resp.status_code in [403, 429]:
+                    return True, True, "Could not verify with GitHub API due to rate limits — accepted based on URL format", ""
                 if pr_resp.status_code == 200:
                     pr_data = pr_resp.json()
                     pr_title = pr_data.get("title", "")
@@ -517,6 +526,8 @@ async def verify_github_link(pr_link: str, target_repo: str, issue_number: int) 
                     
                 diff_headers = {**headers, "Accept": "application/vnd.github.v3.diff"}
                 diff_resp = await client.get(f"https://api.github.com/repos/{owner}/{repo_name}/pulls/{identifier}", headers=diff_headers, timeout=15)
+                if diff_resp.status_code in [403, 429]:
+                    return True, True, "Could not verify with GitHub API due to rate limits — accepted based on URL format", ""
                 if diff_resp.status_code == 200:
                     diff = diff_resp.text
                     
@@ -529,10 +540,14 @@ async def verify_github_link(pr_link: str, target_repo: str, issue_number: int) 
                 diff_headers = {**headers, "Accept": "application/vnd.github.v3.diff"}
                 compare_url = f"https://api.github.com/repos/{owner}/{repo_name}/compare/{default_branch}...{branch}"
                 diff_resp = await client.get(compare_url, headers=diff_headers, timeout=15)
+                if diff_resp.status_code in [403, 429]:
+                    return True, True, "Could not verify with GitHub API due to rate limits — accepted based on URL format", ""
                 if diff_resp.status_code == 200:
                     diff = diff_resp.text
                     
                 commits_resp = await client.get(f"https://api.github.com/repos/{owner}/{repo_name}/commits", params={"sha": branch, "per_page": 5}, headers=headers, timeout=15)
+                if commits_resp.status_code in [403, 429]:
+                    return True, True, "Could not verify with GitHub API due to rate limits — accepted based on URL format", ""
                 if commits_resp.status_code == 200:
                     commits = commits_resp.json()
                     pr_title = commits[0]["commit"]["message"] if commits else f"Branch {branch}"
