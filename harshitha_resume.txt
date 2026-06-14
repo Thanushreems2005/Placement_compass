@@ -1,0 +1,36 @@
+HARSHITHA P M
+harshithapm2004@gmail.com | +91 9876543210
+https://linkedin.com/in/harshitha-pm
+https://github.com/harshithapm
+
+SUMMARY
+Highly motivated Software Engineering student with experience in Full Stack development, Data Structures, and Algorithmic problem-solving. Strong academic track record and proven capability in developing responsive React web applications.
+
+EDUCATION
+PES University, Bachelor of Technology in Computer Science
+Graduation: 2026
+CGPA: 8.5 / 10.0
+
+SKILLS
+Technical Skills: Python, Java, JavaScript, React, SQL, HTML, CSS, Data Structures and Algorithms (DSA), Git, GitHub.
+Soft Skills: Communication, Problem Solving, Team Collaboration.
+
+EXPERIENCE
+Software Engineer Intern - Ather Energy
+- Developed automated testing scripts using Python and Selenium, reducing execution times by 20%.
+- Participated in frontend feature releases with React and automated CI/CD deployments.
+- Assisted in SQL database queries and API endpoint integrations.
+
+PROJECTS
+Placement Intelligence Portal
+- Built a unified Student Career Dashboard featuring placement readiness analysis and resume ATS optimization.
+- Engineered search features for company targeting and integrated responsive progress indicators with modern transitions.
+- Utilized React and tailwind-merge to build reusable components, resulting in a premium glassmorphic UI.
+
+Aptitude Tracker
+- Implemented real-time analytics for student aptitude test performances using SQL databases and Java.
+
+CERTIFICATIONS
+- Python Programming Mastery Certificate
+- Advanced React Development and UI/UX Design
+- SQL Database Design and Optimization

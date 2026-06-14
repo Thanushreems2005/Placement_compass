@@ -27,7 +27,7 @@ export function MissionDetailModal({ mission, isOpen, onClose, onAccept }: Missi
         <DialogHeader className="gap-2">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-background rounded-lg shadow-sm border border-border/40">
-              <CompanyLogo name={mission.company} size="sm" />
+              <CompanyLogo name={mission.company} size={40} />
             </div>
             <div>
               <DialogTitle className="text-xl">{mission.title}</DialogTitle>

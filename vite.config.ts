@@ -13,7 +13,6 @@ export default defineConfig({
   ],
   build: {
     outDir: "dist/client"
-<<<<<<< HEAD
   },
   server: {
     proxy: {
@@ -25,7 +24,7 @@ export default defineConfig({
         timeout: 10000,
         configure: (proxy) => {
           // Suppress ECONNREFUSED noise during backend startup
-          proxy.on('error', (err, _req, res) => {
+          proxy.on('error', (err, _req, res: any) => {
             if ((err as NodeJS.ErrnoException).code === 'ECONNREFUSED') {
               if (res && !res.headersSent && typeof (res as any).writeHead === 'function') {
                 (res as any).writeHead(502, { 'Content-Type': 'application/json' });
@@ -36,7 +35,5 @@ export default defineConfig({
         },
       }
     }
-=======
->>>>>>> 2bd4070965769526e2d3ed6a503120533cb93ef2
   }
 });

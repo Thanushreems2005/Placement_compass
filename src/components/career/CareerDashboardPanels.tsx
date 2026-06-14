@@ -407,7 +407,7 @@ export function ReadinessScorePanel({
   const dash = (Math.min(Math.max(score, 0), 100) / 100) * circumference;
 
   return (
-    <section className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+    <section className="rounded-xl border border-border bg-surface p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/5">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <span className="label-eyebrow">Placement readiness</span>
@@ -527,7 +527,7 @@ export function CompanySelectorPanel({
   onSelect: (company: string) => void;
 }) {
   return (
-    <section className="mt-6 rounded-xl border border-border bg-surface p-5 shadow-sm">
+    <section className="mt-6 rounded-xl border border-border bg-surface p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/5">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)] lg:items-end">
         <div>
           <span className="label-eyebrow">Company selection</span>
@@ -543,7 +543,7 @@ export function CompanySelectorPanel({
           <Skeleton className="h-10 rounded-md" />
         ) : (
           <Select value={selectedCompany ?? ""} onValueChange={onSelect}>
-            <SelectTrigger className="h-11 bg-background font-semibold">
+            <SelectTrigger className="h-12 border-primary/20 bg-background font-semibold shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-md focus:ring-primary/20">
               <SelectValue placeholder="Select company for detailed analysis" />
             </SelectTrigger>
             <SelectContent>
@@ -573,7 +573,7 @@ function MiniSignal({
   tone: "success" | "warning";
 }) {
   return (
-    <div className="rounded-lg border border-border bg-secondary/30 p-3">
+    <div className="rounded-lg border border-border bg-secondary/30 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:bg-secondary/50">
       <div className="field-label">{label}</div>
       <div
         className={cn(
@@ -674,7 +674,7 @@ export function SkillGapPanel({
   loading: boolean;
 }) {
   return (
-    <section className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+    <section className="rounded-xl border border-border bg-surface p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/5">
       <div className="flex items-center gap-2">
         <Target className="h-4 w-4 text-accent" />
         <h2 className="font-display text-lg font-semibold tracking-tight">Skill gap analysis</h2>

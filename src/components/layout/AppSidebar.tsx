@@ -5,6 +5,7 @@ import {
   Brain,
   Building2,
   GitCompareArrows,
+  GraduationCap,
   LayoutGrid,
   Lightbulb,
   ListChecks,
@@ -13,7 +14,9 @@ import {
   FlaskConical,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  BrainCircuit,
+  LogOut
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -32,10 +35,12 @@ export const NAV_ITEMS = [
   { to: "/compare", label: "Compare", icon: GitCompareArrows },
   { to: "/hiring-process", label: "Hiring Process", icon: ListChecks },
   { to: "/skill-mapping", label: "Skill Mapping", icon: Sparkles },
+  { to: "/career-intelligence", label: "Career Intelligence", icon: GraduationCap },
   { to: "/innovx", label: "InnovX", icon: Lightbulb },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/intelligence", label: "Intelligence", icon: Zap },
   { to: "/aptitude", label: "Aptitude", icon: Brain },
+  { to: "/dsa-buddy", label: "DSA Buddy", icon: BrainCircuit },
   { to: "/missionx", label: "MissionX Labs", icon: FlaskConical },
 ];
 
@@ -43,7 +48,19 @@ export function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("placement_career_token");
+    localStorage.removeItem("placement_resume_career_token");
+    localStorage.removeItem("placement_resume_optimizer_analysis");
+    localStorage.removeItem("portal_submissions");
+    localStorage.removeItem("portal_assessments");
+    localStorage.removeItem("portal_diagnostics");
+    window.location.href = "/login";
+  };
+
   useEffect(() => {
+
     setIsMounted(true);
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -142,12 +159,44 @@ export function AppSidebar() {
       </nav>
 
       {/* Footer / Toggle */}
-      <div className="border-t border-border/40 p-3 flex justify-end">
+      <div className={cn(
+        "border-t border-border/40 p-3 flex gap-2",
+        isCollapsed ? "flex-col items-center" : "items-center justify-between"
+      )}>
+        {isCollapsed ? (
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 cursor-pointer"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={16} className="font-semibold text-rose-500">
+                Sign Out
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <Button
+            variant="ghost"
+            className="flex items-center gap-3 px-3 py-2 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 transition-all rounded-lg w-full justify-start font-medium cursor-pointer"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-5 w-5 shrink-0" />
+            <span>Sign Out</span>
+          </Button>
+        )}
+
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="h-8 w-8 rounded-full hover:bg-secondary/80 text-muted-foreground"
+          className="h-8 w-8 rounded-full hover:bg-secondary/80 text-muted-foreground shrink-0 cursor-pointer"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (

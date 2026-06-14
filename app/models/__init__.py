@@ -13,3 +13,5 @@ from app.models.career import (
     ReadinessReport,
     ImprovementRecommendation,
 )
+from app.models.assessment import Assessment
+from app.models.profile import StudentProfile

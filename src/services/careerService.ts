@@ -107,7 +107,7 @@ export interface ResumeFirstAnalysisResponse {
 }
 
 const FASTAPI_BASE =
-  typeof window !== "undefined" && window.location.port === "5173"
+  typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
     ? "http://127.0.0.1:8000/api/v1"
     : `${window.location.origin}/api/v1`;
 

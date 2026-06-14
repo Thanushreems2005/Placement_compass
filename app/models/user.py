@@ -18,3 +18,4 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     student_profile = relationship("Student", back_populates="user", uselist=False)
+    profile = relationship("StudentProfile", back_populates="user", uselist=False)

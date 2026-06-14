@@ -61,7 +61,7 @@ export function MissionCard({ mission, onAccept, onViewDetails }: MissionCardPro
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-background rounded-lg shadow-sm border border-border/40">
-              <CompanyLogo name={mission.company} size="sm" />
+              <CompanyLogo name={mission.company} size={32} />
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">

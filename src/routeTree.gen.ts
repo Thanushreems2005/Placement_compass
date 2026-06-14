@@ -12,16 +12,24 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SkillMappingRouteImport } from './routes/skill-mapping'
 import { Route as ResumeOptimizerRouteImport } from './routes/resume-optimizer'
 import { Route as MissionxRouteImport } from './routes/missionx'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as InnovxRouteImport } from './routes/innovx'
 import { Route as HiringProcessRouteImport } from './routes/hiring-process'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as DsaBuddyRouteImport } from './routes/dsa-buddy'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as CareerIntelligenceRouteImport } from './routes/career-intelligence'
 import { Route as CareerDashboardRouteImport } from './routes/career-dashboard'
 import { Route as AptitudeRouteImport } from './routes/aptitude'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DsaBuddyIndexRouteImport } from './routes/dsa-buddy.index'
+import { Route as DsaBuddySubmissionsRouteImport } from './routes/dsa-buddy.submissions'
+import { Route as DsaBuddyMockOaRouteImport } from './routes/dsa-buddy.mock-oa'
+import { Route as DsaBuddyAssessmentRouteImport } from './routes/dsa-buddy.assessment'
+import { Route as DsaBuddyArenaRouteImport } from './routes/dsa-buddy.arena'
 import { Route as CompanyCompanyIdRouteImport } from './routes/company.$companyId'
 
 const SkillMappingRoute = SkillMappingRouteImport.update({
@@ -37,6 +45,11 @@ const ResumeOptimizerRoute = ResumeOptimizerRouteImport.update({
 const MissionxRoute = MissionxRouteImport.update({
   id: '/missionx',
   path: '/missionx',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntelligenceRoute = IntelligenceRouteImport.update({
@@ -59,6 +72,11 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DsaBuddyRoute = DsaBuddyRouteImport.update({
+  id: '/dsa-buddy',
+  path: '/dsa-buddy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompareRoute = CompareRouteImport.update({
   id: '/compare',
   path: '/compare',
@@ -67,6 +85,11 @@ const CompareRoute = CompareRouteImport.update({
 const CategoriesRoute = CategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareerIntelligenceRoute = CareerIntelligenceRouteImport.update({
+  id: '/career-intelligence',
+  path: '/career-intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CareerDashboardRoute = CareerDashboardRouteImport.update({
@@ -89,6 +112,31 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DsaBuddyIndexRoute = DsaBuddyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DsaBuddyRoute,
+} as any)
+const DsaBuddySubmissionsRoute = DsaBuddySubmissionsRouteImport.update({
+  id: '/submissions',
+  path: '/submissions',
+  getParentRoute: () => DsaBuddyRoute,
+} as any)
+const DsaBuddyMockOaRoute = DsaBuddyMockOaRouteImport.update({
+  id: '/mock-oa',
+  path: '/mock-oa',
+  getParentRoute: () => DsaBuddyRoute,
+} as any)
+const DsaBuddyAssessmentRoute = DsaBuddyAssessmentRouteImport.update({
+  id: '/assessment',
+  path: '/assessment',
+  getParentRoute: () => DsaBuddyRoute,
+} as any)
+const DsaBuddyArenaRoute = DsaBuddyArenaRouteImport.update({
+  id: '/arena',
+  path: '/arena',
+  getParentRoute: () => DsaBuddyRoute,
+} as any)
 const CompanyCompanyIdRoute = CompanyCompanyIdRouteImport.update({
   id: '/company/$companyId',
   path: '/company/$companyId',
@@ -100,32 +148,47 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/aptitude': typeof AptitudeRoute
   '/career-dashboard': typeof CareerDashboardRoute
+  '/career-intelligence': typeof CareerIntelligenceRoute
   '/categories': typeof CategoriesRoute
   '/compare': typeof CompareRoute
+  '/dsa-buddy': typeof DsaBuddyRouteWithChildren
   '/explore': typeof ExploreRoute
   '/hiring-process': typeof HiringProcessRoute
   '/innovx': typeof InnovxRoute
   '/intelligence': typeof IntelligenceRoute
+  '/login': typeof LoginRoute
   '/missionx': typeof MissionxRoute
   '/resume-optimizer': typeof ResumeOptimizerRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
+  '/dsa-buddy/arena': typeof DsaBuddyArenaRoute
+  '/dsa-buddy/assessment': typeof DsaBuddyAssessmentRoute
+  '/dsa-buddy/mock-oa': typeof DsaBuddyMockOaRoute
+  '/dsa-buddy/submissions': typeof DsaBuddySubmissionsRoute
+  '/dsa-buddy/': typeof DsaBuddyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/aptitude': typeof AptitudeRoute
   '/career-dashboard': typeof CareerDashboardRoute
+  '/career-intelligence': typeof CareerIntelligenceRoute
   '/categories': typeof CategoriesRoute
   '/compare': typeof CompareRoute
   '/explore': typeof ExploreRoute
   '/hiring-process': typeof HiringProcessRoute
   '/innovx': typeof InnovxRoute
   '/intelligence': typeof IntelligenceRoute
+  '/login': typeof LoginRoute
   '/missionx': typeof MissionxRoute
   '/resume-optimizer': typeof ResumeOptimizerRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
+  '/dsa-buddy/arena': typeof DsaBuddyArenaRoute
+  '/dsa-buddy/assessment': typeof DsaBuddyAssessmentRoute
+  '/dsa-buddy/mock-oa': typeof DsaBuddyMockOaRoute
+  '/dsa-buddy/submissions': typeof DsaBuddySubmissionsRoute
+  '/dsa-buddy': typeof DsaBuddyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,16 +196,24 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/aptitude': typeof AptitudeRoute
   '/career-dashboard': typeof CareerDashboardRoute
+  '/career-intelligence': typeof CareerIntelligenceRoute
   '/categories': typeof CategoriesRoute
   '/compare': typeof CompareRoute
+  '/dsa-buddy': typeof DsaBuddyRouteWithChildren
   '/explore': typeof ExploreRoute
   '/hiring-process': typeof HiringProcessRoute
   '/innovx': typeof InnovxRoute
   '/intelligence': typeof IntelligenceRoute
+  '/login': typeof LoginRoute
   '/missionx': typeof MissionxRoute
   '/resume-optimizer': typeof ResumeOptimizerRoute
   '/skill-mapping': typeof SkillMappingRoute
   '/company/$companyId': typeof CompanyCompanyIdRoute
+  '/dsa-buddy/arena': typeof DsaBuddyArenaRoute
+  '/dsa-buddy/assessment': typeof DsaBuddyAssessmentRoute
+  '/dsa-buddy/mock-oa': typeof DsaBuddyMockOaRoute
+  '/dsa-buddy/submissions': typeof DsaBuddySubmissionsRoute
+  '/dsa-buddy/': typeof DsaBuddyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,48 +222,71 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/aptitude'
     | '/career-dashboard'
+    | '/career-intelligence'
     | '/categories'
     | '/compare'
+    | '/dsa-buddy'
     | '/explore'
     | '/hiring-process'
     | '/innovx'
     | '/intelligence'
+    | '/login'
     | '/missionx'
     | '/resume-optimizer'
     | '/skill-mapping'
     | '/company/$companyId'
+    | '/dsa-buddy/arena'
+    | '/dsa-buddy/assessment'
+    | '/dsa-buddy/mock-oa'
+    | '/dsa-buddy/submissions'
+    | '/dsa-buddy/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/analytics'
     | '/aptitude'
     | '/career-dashboard'
+    | '/career-intelligence'
     | '/categories'
     | '/compare'
     | '/explore'
     | '/hiring-process'
     | '/innovx'
     | '/intelligence'
+    | '/login'
     | '/missionx'
     | '/resume-optimizer'
     | '/skill-mapping'
     | '/company/$companyId'
+    | '/dsa-buddy/arena'
+    | '/dsa-buddy/assessment'
+    | '/dsa-buddy/mock-oa'
+    | '/dsa-buddy/submissions'
+    | '/dsa-buddy'
   id:
     | '__root__'
     | '/'
     | '/analytics'
     | '/aptitude'
     | '/career-dashboard'
+    | '/career-intelligence'
     | '/categories'
     | '/compare'
+    | '/dsa-buddy'
     | '/explore'
     | '/hiring-process'
     | '/innovx'
     | '/intelligence'
+    | '/login'
     | '/missionx'
     | '/resume-optimizer'
     | '/skill-mapping'
     | '/company/$companyId'
+    | '/dsa-buddy/arena'
+    | '/dsa-buddy/assessment'
+    | '/dsa-buddy/mock-oa'
+    | '/dsa-buddy/submissions'
+    | '/dsa-buddy/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -200,12 +294,15 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   AptitudeRoute: typeof AptitudeRoute
   CareerDashboardRoute: typeof CareerDashboardRoute
+  CareerIntelligenceRoute: typeof CareerIntelligenceRoute
   CategoriesRoute: typeof CategoriesRoute
   CompareRoute: typeof CompareRoute
+  DsaBuddyRoute: typeof DsaBuddyRouteWithChildren
   ExploreRoute: typeof ExploreRoute
   HiringProcessRoute: typeof HiringProcessRoute
   InnovxRoute: typeof InnovxRoute
   IntelligenceRoute: typeof IntelligenceRoute
+  LoginRoute: typeof LoginRoute
   MissionxRoute: typeof MissionxRoute
   ResumeOptimizerRoute: typeof ResumeOptimizerRoute
   SkillMappingRoute: typeof SkillMappingRoute
@@ -233,6 +330,13 @@ declare module '@tanstack/react-router' {
       path: '/missionx'
       fullPath: '/missionx'
       preLoaderRoute: typeof MissionxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/intelligence': {
@@ -263,6 +367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dsa-buddy': {
+      id: '/dsa-buddy'
+      path: '/dsa-buddy'
+      fullPath: '/dsa-buddy'
+      preLoaderRoute: typeof DsaBuddyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compare': {
       id: '/compare'
       path: '/compare'
@@ -275,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/categories'
       preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/career-intelligence': {
+      id: '/career-intelligence'
+      path: '/career-intelligence'
+      fullPath: '/career-intelligence'
+      preLoaderRoute: typeof CareerIntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/career-dashboard': {
@@ -305,6 +423,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dsa-buddy/': {
+      id: '/dsa-buddy/'
+      path: '/'
+      fullPath: '/dsa-buddy/'
+      preLoaderRoute: typeof DsaBuddyIndexRouteImport
+      parentRoute: typeof DsaBuddyRoute
+    }
+    '/dsa-buddy/submissions': {
+      id: '/dsa-buddy/submissions'
+      path: '/submissions'
+      fullPath: '/dsa-buddy/submissions'
+      preLoaderRoute: typeof DsaBuddySubmissionsRouteImport
+      parentRoute: typeof DsaBuddyRoute
+    }
+    '/dsa-buddy/mock-oa': {
+      id: '/dsa-buddy/mock-oa'
+      path: '/mock-oa'
+      fullPath: '/dsa-buddy/mock-oa'
+      preLoaderRoute: typeof DsaBuddyMockOaRouteImport
+      parentRoute: typeof DsaBuddyRoute
+    }
+    '/dsa-buddy/assessment': {
+      id: '/dsa-buddy/assessment'
+      path: '/assessment'
+      fullPath: '/dsa-buddy/assessment'
+      preLoaderRoute: typeof DsaBuddyAssessmentRouteImport
+      parentRoute: typeof DsaBuddyRoute
+    }
+    '/dsa-buddy/arena': {
+      id: '/dsa-buddy/arena'
+      path: '/arena'
+      fullPath: '/dsa-buddy/arena'
+      preLoaderRoute: typeof DsaBuddyArenaRouteImport
+      parentRoute: typeof DsaBuddyRoute
+    }
     '/company/$companyId': {
       id: '/company/$companyId'
       path: '/company/$companyId'
@@ -315,17 +468,40 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DsaBuddyRouteChildren {
+  DsaBuddyArenaRoute: typeof DsaBuddyArenaRoute
+  DsaBuddyAssessmentRoute: typeof DsaBuddyAssessmentRoute
+  DsaBuddyMockOaRoute: typeof DsaBuddyMockOaRoute
+  DsaBuddySubmissionsRoute: typeof DsaBuddySubmissionsRoute
+  DsaBuddyIndexRoute: typeof DsaBuddyIndexRoute
+}
+
+const DsaBuddyRouteChildren: DsaBuddyRouteChildren = {
+  DsaBuddyArenaRoute: DsaBuddyArenaRoute,
+  DsaBuddyAssessmentRoute: DsaBuddyAssessmentRoute,
+  DsaBuddyMockOaRoute: DsaBuddyMockOaRoute,
+  DsaBuddySubmissionsRoute: DsaBuddySubmissionsRoute,
+  DsaBuddyIndexRoute: DsaBuddyIndexRoute,
+}
+
+const DsaBuddyRouteWithChildren = DsaBuddyRoute._addFileChildren(
+  DsaBuddyRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   AptitudeRoute: AptitudeRoute,
   CareerDashboardRoute: CareerDashboardRoute,
+  CareerIntelligenceRoute: CareerIntelligenceRoute,
   CategoriesRoute: CategoriesRoute,
   CompareRoute: CompareRoute,
+  DsaBuddyRoute: DsaBuddyRouteWithChildren,
   ExploreRoute: ExploreRoute,
   HiringProcessRoute: HiringProcessRoute,
   InnovxRoute: InnovxRoute,
   IntelligenceRoute: IntelligenceRoute,
+  LoginRoute: LoginRoute,
   MissionxRoute: MissionxRoute,
   ResumeOptimizerRoute: ResumeOptimizerRoute,
   SkillMappingRoute: SkillMappingRoute,

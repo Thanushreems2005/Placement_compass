@@ -1,5 +1,24 @@
-import logging
+import sys
 import os
+
+print("--- STARTING PYTHON MAIN ---")
+print("ORIGINAL sys.path:", sys.path)
+
+# Prevent namespace package collision with local "supabase" folder (case-insensitive and robust)
+_workspace_root = os.path.abspath(os.path.dirname(os.path.dirname(__file__))).lower()
+_new_path = []
+for _p in sys.path:
+    if not _p:
+        continue
+    _p_abs = os.path.abspath(_p).lower()
+    if _p_abs == _workspace_root:
+        continue
+    _new_path.append(_p)
+sys.path = _new_path + [_workspace_root]
+
+print("ADJUSTED sys.path:", sys.path)
+
+import logging
 # Load .env early — before any other imports — so env vars are available
 # regardless of how the process is launched (concurrently, direct, etc.)
 from pathlib import Path as _Path
@@ -16,12 +35,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from app.core.config import settings
-<<<<<<< HEAD
-from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health
-from app.routes import aptitude_v2
-=======
-from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health, career
->>>>>>> 2bd4070965769526e2d3ed6a503120533cb93ef2
+from app.routes import auth, users, students, companies, placements, analytics, admin, notifications, health, career, aptitude_v2, arena, dsa_buddy, assessments, missions, profiles
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.hardening import RequestIDMiddleware, TimeoutMiddleware
 from app.core.exceptions import global_exception_handler, not_found_exception_handler, NotFoundException
@@ -36,6 +50,12 @@ async def lifespan(app: FastAPI):
     
     logger = logging.getLogger("startup")
     logger.info("Executing Enterprise-Grade Startup Diagnostics...")
+    
+    # Auto-initialize database tables if not existing
+    from app.database import Base, engine
+    import app.models
+    Base.metadata.create_all(bind=engine)
+    logger.info("Local database tables auto-initialization: COMPLETE")
     
     # 1. Verify Environment Variables (read from pydantic settings, which loads .env)
     missing_vars = []
@@ -110,12 +130,13 @@ app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
 app.include_router(notifications.router, prefix=settings.API_V1_STR)
 app.include_router(health.router, prefix=settings.API_V1_STR)
-<<<<<<< HEAD
-app.include_router(aptitude_v2.router, prefix=settings.API_V1_STR)
-
-=======
 app.include_router(career.router, prefix=settings.API_V1_STR)
->>>>>>> 2bd4070965769526e2d3ed6a503120533cb93ef2
+app.include_router(missions.router, prefix=settings.API_V1_STR)
+app.include_router(aptitude_v2.router, prefix=settings.API_V1_STR)
+app.include_router(arena.router, prefix=settings.API_V1_STR)
+app.include_router(dsa_buddy.router, prefix=settings.API_V1_STR)
+app.include_router(assessments.router, prefix=settings.API_V1_STR)
+app.include_router(profiles.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
